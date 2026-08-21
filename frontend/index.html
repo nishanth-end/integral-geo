@@ -1,0 +1,3047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastral Survey Register — NHAI Karnataka Highway Projects</title>
+
+  <!-- Google Fonts: Spectral (Official Serif), Newsreader (Legible Body), IBM Plex Mono (Data) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Spectral:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+  <style>
+    /* ==========================================================================
+       CADASTRAL SURVEY / OFFICIAL LAND RECORD REGISTER AESTHETIC
+       ========================================================================== */
+
+    :root {
+      --bg-parchment: #f4f1e8;
+      --bg-ledger: #ece7d8;
+      --bg-card: #faf8f2;
+      --bg-card-alt: #f1ebd9;
+      --ink-primary: #2b2620;
+      --ink-secondary: #564c40;
+      --ink-muted: #7d6e5d;
+      --border-rule: #6b5d4f;
+      --border-light: #c2b5a5;
+      --border-faint: #dbd2c4;
+      
+      --accent-moss: #3e562c;
+      --accent-moss-light: #edf2e8;
+      --accent-moss-border: #91a87e;
+      
+      --accent-rust: #9e4726;
+      --accent-rust-light: #f7ece6;
+      --accent-rust-border: #d49a80;
+      
+      --accent-ochre: #8a651e;
+      --accent-ochre-light: #f6f0df;
+      --accent-ochre-border: #cbb47e;
+
+      --font-serif: 'Spectral', Georgia, 'Times New Roman', serif;
+      --font-body: 'Newsreader', Georgia, serif;
+      --font-mono: 'IBM Plex Mono', 'Courier Prime', Courier, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      background-color: var(--bg-parchment);
+      color: var(--ink-primary);
+      font-family: var(--font-body);
+      font-size: 14px;
+      line-height: 1.5;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Outer Survey Document Frame */
+    .document-frame {
+      display: flex;
+      height: 100vh;
+      width: 100vw;
+      padding: 10px;
+      background-color: #dfd9c8;
+      gap: 10px;
+    }
+
+    /* ==========================================================================
+       MAP PANEL & SURVEY CANVAS
+       ========================================================================== */
+
+    .map-panel-container {
+      flex: 1;
+      position: relative;
+      background: var(--bg-parchment);
+      border: 2px solid var(--border-rule);
+      box-shadow: inset 0 0 0 2px var(--bg-parchment), inset 0 0 0 3px var(--border-rule);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Survey Corner Registration Marks */
+    .map-panel-container::before,
+    .map-panel-container::after {
+      content: "";
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      z-index: 1000;
+      pointer-events: none;
+    }
+    .map-panel-container::before {
+      top: 6px;
+      left: 6px;
+      border-top: 2px solid var(--border-rule);
+      border-left: 2px solid var(--border-rule);
+    }
+    .map-panel-container::after {
+      bottom: 6px;
+      right: 6px;
+      border-bottom: 2px solid var(--border-rule);
+      border-right: 2px solid var(--border-rule);
+    }
+
+    .survey-header-bar {
+      padding: 6px 14px;
+      background: var(--bg-ledger);
+      border-bottom: 1px solid var(--border-rule);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-serif);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ink-secondary);
+      z-index: 10;
+    }
+
+    .survey-header-bar span.doc-id {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: normal;
+      color: var(--ink-muted);
+    }
+
+    #map {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      background: #e6dfcc;
+      z-index: 1;
+    }
+
+    /* Desaturate & Sepia-tone OpenStreetMap Tiles to Parchment Paper Aesthetic */
+    .leaflet-tile-pane {
+      filter: sepia(0.42) saturate(0.55) brightness(0.96) contrast(1.08);
+    }
+
+    .map-legend-stamp {
+      position: absolute;
+      bottom: 18px;
+      left: 18px;
+      z-index: 999;
+      background: rgba(244, 241, 232, 0.95);
+      border: 1px solid var(--border-rule);
+      padding: 8px 12px;
+      font-family: var(--font-serif);
+      font-size: 0.75rem;
+      box-shadow: 2px 2px 0 rgba(43, 38, 32, 0.1);
+      line-height: 1.6;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--ink-primary);
+    }
+
+    .legend-line {
+      width: 18px;
+      height: 4px;
+      background: var(--accent-moss);
+      border-top: 1px solid #233418;
+      border-bottom: 1px solid #233418;
+      display: inline-block;
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-moss);
+      border: 1px solid #233418;
+      display: inline-block;
+    }
+
+    /* ==========================================================================
+       SIDEBAR / AUDIT REGISTER PANEL
+       ========================================================================== */
+
+    #sidebar {
+      width: 440px;
+      min-width: 360px;
+      max-width: 500px;
+      height: 100%;
+      background: var(--bg-parchment);
+      border: 2px solid var(--border-rule);
+      box-shadow: inset 0 0 0 2px var(--bg-parchment), inset 0 0 0 3px var(--border-rule);
+      display: flex;
+      flex-direction: column;
+      z-index: 2;
+    }
+
+    .sidebar-header {
+      padding: 16px 18px 12px 18px;
+      background: var(--bg-ledger);
+      border-bottom: 1px solid var(--border-rule);
+    }
+
+    .agency-subtitle {
+      font-family: var(--font-serif);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--ink-muted);
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .sidebar-header h1 {
+      font-family: var(--font-serif);
+      font-size: 1.28rem;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      color: var(--ink-primary);
+      line-height: 1.25;
+      margin-bottom: 8px;
+    }
+
+    .doc-meta-strip {
+      font-family: var(--font-mono);
+      font-size: 0.73rem;
+      color: var(--ink-secondary);
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px dashed var(--border-light);
+      padding-top: 6px;
+      margin-top: 6px;
+    }
+
+    /* Official Stamped Audit Summary */
+    .ledger-stats-box {
+      margin-top: 10px;
+      border: 1px solid var(--border-rule);
+      background: var(--bg-card);
+      padding: 10px 12px;
+      position: relative;
+    }
+
+    .ledger-stats-box::before {
+      content: "AUDIT ENROLLMENT RECORD";
+      position: absolute;
+      top: -7px;
+      left: 10px;
+      background: var(--bg-ledger);
+      padding: 0 6px;
+      font-family: var(--font-serif);
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--ink-secondary);
+    }
+
+    .stat-main {
+      font-family: var(--font-serif);
+      font-size: 0.96rem;
+      font-weight: 600;
+      color: var(--ink-primary);
+      margin-bottom: 4px;
+    }
+
+    .stat-main span.count-highlight {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      color: var(--accent-moss);
+    }
+
+    .stat-breakdown {
+      font-size: 0.78rem;
+      color: var(--ink-secondary);
+      line-height: 1.45;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      margin-top: 6px;
+      padding-top: 6px;
+      border-top: 1px dotted var(--border-light);
+    }
+
+    .stat-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .stamp-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .stamp-dot.moss { background: var(--accent-moss); }
+    .stamp-dot.rust { background: var(--accent-rust); }
+    .stamp-dot.ochre { background: var(--accent-ochre); }
+
+    /* Ledger Register Content */
+    .sidebar-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0;
+      background: var(--bg-parchment);
+    }
+
+    .register-section-title {
+      position: sticky;
+      top: 0;
+      background: var(--bg-ledger);
+      border-bottom: 1px solid var(--border-rule);
+      padding: 8px 16px;
+      font-family: var(--font-serif);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-secondary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 5;
+    }
+
+    .unplaced-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .unplaced-item {
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border-faint);
+      background: var(--bg-card);
+      transition: background-color 0.15s ease;
+    }
+
+    .unplaced-item:nth-child(even) {
+      background: var(--bg-card-alt);
+    }
+
+    .unplaced-item:hover {
+      background: #e9e1cd;
+    }
+
+    .unplaced-row-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 3px;
+    }
+
+    .unplaced-nh {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      font-size: 0.8rem;
+      color: var(--ink-primary);
+      background: var(--bg-ledger);
+      padding: 1px 5px;
+      border: 1px solid var(--border-light);
+      letter-spacing: 0.02em;
+    }
+
+    .unplaced-key {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--ink-muted);
+    }
+
+    .unplaced-corridor {
+      font-family: var(--font-serif);
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--ink-primary);
+      line-height: 1.35;
+      margin: 3px 0 5px 0;
+    }
+
+    .unplaced-reason-tag {
+      display: inline-block;
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 0.76rem;
+      padding: 2px 8px;
+      border-radius: 1px;
+      border: 1px solid;
+    }
+
+    .unplaced-reason-tag.rust {
+      color: var(--accent-rust);
+      background: var(--accent-rust-light);
+      border-color: var(--accent-rust-border);
+    }
+
+    .unplaced-reason-tag.ochre {
+      color: var(--accent-ochre);
+      background: var(--accent-ochre-light);
+      border-color: var(--accent-ochre-border);
+    }
+
+    /* Scrollbar styling (aged brass/paper feel) */
+    .sidebar-content::-webkit-scrollbar {
+      width: 6px;
+    }
+    .sidebar-content::-webkit-scrollbar-track {
+      background: var(--bg-ledger);
+    }
+    .sidebar-content::-webkit-scrollbar-thumb {
+      background: var(--border-light);
+      border-radius: 0;
+    }
+    .sidebar-content::-webkit-scrollbar-thumb:hover {
+      background: var(--border-rule);
+    }
+
+    /* ==========================================================================
+       LEAFLET POPUP — CADASTRAL SURVEY ENTRY CARD
+       ========================================================================== */
+
+    .leaflet-popup-content-wrapper {
+      background: var(--bg-card);
+      color: var(--ink-primary);
+      border: 2px solid var(--border-rule);
+      border-radius: 0;
+      box-shadow: 3px 3px 0 rgba(43, 38, 32, 0.25);
+      padding: 0;
+    }
+
+    .leaflet-popup-content {
+      margin: 0;
+      padding: 12px 14px;
+      font-family: var(--font-body);
+      font-size: 0.84rem;
+      line-height: 1.4;
+      min-width: 250px;
+    }
+
+    .leaflet-popup-tip {
+      background: var(--bg-card);
+      border: 1px solid var(--border-rule);
+      box-shadow: none;
+    }
+
+    .cadastral-card-header {
+      border-bottom: 2px double var(--border-rule);
+      padding-bottom: 6px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .cadastral-seal {
+      font-family: var(--font-serif);
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--ink-muted);
+      font-weight: 700;
+    }
+
+    .cadastral-nh-badge {
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      font-weight: 600;
+      background: var(--bg-ledger);
+      padding: 1px 6px;
+      border: 1px solid var(--border-light);
+      color: var(--ink-primary);
+    }
+
+    .cadastral-corridor-title {
+      font-family: var(--font-serif);
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: var(--ink-primary);
+      line-height: 1.3;
+      margin-bottom: 8px;
+    }
+
+    .cadastral-fields-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 4px;
+    }
+
+    .cadastral-fields-table tr {
+      border-bottom: 1px dashed var(--border-faint);
+    }
+
+    .cadastral-fields-table tr:last-child {
+      border-bottom: none;
+    }
+
+    .cadastral-fields-table td {
+      padding: 4px 0;
+      vertical-align: top;
+    }
+
+    .cadastral-fields-table td.field-label {
+      font-family: var(--font-serif);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--ink-muted);
+      width: 38%;
+    }
+
+    .cadastral-fields-table td.field-value {
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      color: var(--ink-primary);
+      word-break: break-word;
+    }
+
+    .cadastral-card-footer {
+      border-top: 1px solid var(--border-light);
+      margin-top: 8px;
+      padding-top: 5px;
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-serif);
+      font-size: 0.68rem;
+      font-style: italic;
+      color: var(--ink-muted);
+    }
+
+    /* Mobile Adaptability */
+    @media (max-width: 820px) {
+      .document-frame {
+        flex-direction: column;
+        padding: 4px;
+        gap: 4px;
+      }
+      #sidebar {
+        width: 100%;
+        max-width: none;
+        height: 42%;
+      }
+      .map-panel-container {
+        height: 58%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="document-frame">
+    <!-- MAP PANEL (SURVEY VIEW) -->
+    <div class="map-panel-container">
+      <div class="survey-header-bar">
+        <span>Survey of India Grid &bull; National Highway Network</span>
+        <span class="doc-id">DIV-KA / MIS-7A</span>
+      </div>
+      <div id="map"></div>
+      <div class="map-legend-stamp">
+        <div style="font-weight: 700; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px; color: var(--ink-secondary);">Survey Legend</div>
+        <div class="legend-item"><span class="legend-line"></span><span>Corridor Alignment (Approx. Chainage)</span></div>
+        <div class="legend-item"><span class="legend-dot"></span><span>Point Asset / Structure Location</span></div>
+      </div>
+    </div>
+
+    <!-- UNPLACED AUDIT REGISTER PANEL -->
+    <div id="sidebar">
+      <div class="sidebar-header">
+        <div class="agency-subtitle">National Highways Authority of India</div>
+        <h1>Karnataka Corridor Register</h1>
+        
+        <div class="doc-meta-strip">
+          <span>STATE: KARNATAKA</span>
+          <span>RECORD DATE: AUG 2026</span>
+          <span>FORMAT: MIS CADASTRAL</span>
+        </div>
+
+        <div id="coverageSummary" class="ledger-stats-box">
+          <div class="stat-main">Survey Status: Loading project register...</div>
+        </div>
+      </div>
+
+      <div class="register-section-title">
+        <span>Excluded / Unplaced Register</span>
+        <span id="unplacedBadgeCount" style="font-family: var(--font-mono); font-size: 0.72rem; font-weight: normal;">43 Records</span>
+      </div>
+
+      <div class="sidebar-content">
+        <ul id="unplacedList" class="unplaced-list">
+          <!-- Populated dynamically via JS -->
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <script>
+    // Fallback embedded data in case file:// protocol restricts fetch()
+    const EMBEDDED_GEOJSON = {
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            74.394432,
+            16.349132
+          ],
+          [
+            74.275972,
+            16.643139
+          ]
+        ]
+      },
+      "properties": {
+        "id": 2,
+        "project_key": "NH-48-KA-caaa8bee",
+        "nh_number": "NH-48",
+        "corridor_name": "6L from Sankeshwar Bypass to MH-KNT Border from Km. 555.017 ...",
+        "chainage_start_km": 555.017,
+        "chainage_end_km": 592.853,
+        "package_label": "Pkg-II",
+        "lanes_min": 6,
+        "lanes_max": 6,
+        "has_paved_shoulder": false,
+        "contractor_raw": "S M Autade Pvt Ltd",
+        "state_raw": "Karnataka, Maharashtra",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          75.172896,
+          15.03807
+        ]
+      },
+      "properties": {
+        "id": 4,
+        "project_key": "NH-48-KA-69482ee6",
+        "nh_number": "NH-48",
+        "corridor_name": "Hubli-Haveri Section",
+        "chainage_start_km": 361.9,
+        "chainage_end_km": null,
+        "package_label": null,
+        "lanes_min": 6,
+        "lanes_max": 6,
+        "has_paved_shoulder": false,
+        "contractor_raw": "MD-Infra India Pvt. Ltd.",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          75.88379,
+          14.448005
+        ]
+      },
+      "properties": {
+        "id": 6,
+        "project_key": "NH-48-KA-3a84a84d",
+        "nh_number": "NH-48",
+        "corridor_name": "Construction of VUP at Km.255+770 near Bada Cross of NH-48 (...",
+        "chainage_start_km": 255.77,
+        "chainage_end_km": null,
+        "package_label": null,
+        "lanes_min": 6,
+        "lanes_max": 6,
+        "has_paved_shoulder": false,
+        "contractor_raw": "Ibha constructions Pvt. Ltd",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            77.039508,
+            13.468775
+          ],
+          [
+            76.430678,
+            14.245379
+          ]
+        ]
+      },
+      "properties": {
+        "id": 7,
+        "project_key": "NH-48-KA-6789783e",
+        "nh_number": "NH-48",
+        "corridor_name": "Tumkur-Chitradurga Section",
+        "chainage_start_km": 75.0,
+        "chainage_end_km": 189.0,
+        "package_label": null,
+        "lanes_min": 6,
+        "lanes_max": 6,
+        "has_paved_shoulder": false,
+        "contractor_raw": "Paidala Thirupathi Reddy & Bros.",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            77.039508,
+            13.468775
+          ],
+          [
+            76.430678,
+            14.245379
+          ]
+        ]
+      },
+      "properties": {
+        "id": 8,
+        "project_key": "NH-48-KA-6789783e-1",
+        "nh_number": "NH-48",
+        "corridor_name": "Tumkur-Chitradurga Section",
+        "chainage_start_km": 75.0,
+        "chainage_end_km": 189.0,
+        "package_label": null,
+        "lanes_min": 6,
+        "lanes_max": 6,
+        "has_paved_shoulder": false,
+        "contractor_raw": "KGK Engineers Pvt Ltd.",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            77.039508,
+            13.468775
+          ],
+          [
+            76.430678,
+            14.245379
+          ]
+        ]
+      },
+      "properties": {
+        "id": 9,
+        "project_key": "NH-48-KA-6789783e-2",
+        "nh_number": "NH-48",
+        "corridor_name": "Tumkur-Chitradurga Section",
+        "chainage_start_km": 75.0,
+        "chainage_end_km": 189.0,
+        "package_label": null,
+        "lanes_min": 6,
+        "lanes_max": 6,
+        "has_paved_shoulder": false,
+        "contractor_raw": "KGK Engineers Pvt Ltd.",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            77.450232,
+            13.067603
+          ],
+          [
+            77.30877,
+            13.170043
+          ]
+        ]
+      },
+      "properties": {
+        "id": 12,
+        "project_key": "NH-48-KA-49e888b1",
+        "nh_number": "NH-48",
+        "corridor_name": "Bengaluru Nelamangala Section",
+        "chainage_start_km": 10.0,
+        "chainage_end_km": 29.5,
+        "package_label": null,
+        "lanes_min": 6,
+        "lanes_max": 6,
+        "has_paved_shoulder": false,
+        "contractor_raw": "S M Autade Pvt Ltd",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            77.2414,
+            13.227973
+          ],
+          [
+            77.379786,
+            13.279771
+          ]
+        ]
+      },
+      "properties": {
+        "id": 15,
+        "project_key": "NH-648-KA-aeb3afac",
+        "nh_number": "NH-648",
+        "corridor_name": "Dobbaspet to Doddaballapur Bypass Section",
+        "chainage_start_km": 0.0,
+        "chainage_end_km": 42.0,
+        "package_label": null,
+        "lanes_min": 4,
+        "lanes_max": 4,
+        "has_paved_shoulder": false,
+        "contractor_raw": "L Kasi Reddy",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            77.696028,
+            12.810294
+          ],
+          [
+            77.592316,
+            12.979367
+          ]
+        ]
+      },
+      "properties": {
+        "id": 17,
+        "project_key": "NH-44-KA-6603cc0b",
+        "nh_number": "NH-44",
+        "corridor_name": "Construction of additional VUPs, LVUP, Foot Over Bridge and ...",
+        "chainage_start_km": 484.8,
+        "chainage_end_km": 518.3,
+        "package_label": null,
+        "lanes_min": 4,
+        "lanes_max": 6,
+        "has_paved_shoulder": false,
+        "contractor_raw": "Nikhil Infratech",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.598037,
+          13.095992
+        ]
+      },
+      "properties": {
+        "id": 18,
+        "project_key": "NH-44-KA-9fa882c2",
+        "nh_number": "NH-44",
+        "corridor_name": "Hyderabad \u2013 Bengaluru Section",
+        "chainage_start_km": 538.832,
+        "chainage_end_km": null,
+        "package_label": null,
+        "lanes_min": 4,
+        "lanes_max": 6,
+        "has_paved_shoulder": false,
+        "contractor_raw": "Vidya InfraBuilt Pvt. Ltd.",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            77.599159,
+            13.098801
+          ],
+          [
+            77.625643,
+            13.159758
+          ]
+        ]
+      },
+      "properties": {
+        "id": 19,
+        "project_key": "NH-44-KA-87acf90e",
+        "nh_number": "NH-44",
+        "corridor_name": "in Bengaluru Section",
+        "chainage_start_km": 534.72,
+        "chainage_end_km": 556.84,
+        "package_label": null,
+        "lanes_min": 6,
+        "lanes_max": 6,
+        "has_paved_shoulder": false,
+        "contractor_raw": "The Trinity Group",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            75.480608,
+            11.781456
+          ],
+          [
+            75.018935,
+            12.511855
+          ]
+        ]
+      },
+      "properties": {
+        "id": 21,
+        "project_key": "NH-66-KA-91d9196a",
+        "nh_number": "NH-66",
+        "corridor_name": "Goa-Karnataka border to Kundapur Section",
+        "chainage_start_km": 93.7,
+        "chainage_end_km": 283.3,
+        "package_label": null,
+        "lanes_min": 4,
+        "lanes_max": 4,
+        "has_paved_shoulder": false,
+        "contractor_raw": "Bhullar Constructions",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            75.480608,
+            11.781456
+          ],
+          [
+            75.018935,
+            12.511855
+          ]
+        ]
+      },
+      "properties": {
+        "id": 22,
+        "project_key": "NH-66-KA-91b6eda9",
+        "nh_number": "NH-66",
+        "corridor_name": "Goa-Karnataka Border - Kundapur Section",
+        "chainage_start_km": 93.7,
+        "chainage_end_km": 283.3,
+        "package_label": null,
+        "lanes_min": 4,
+        "lanes_max": 4,
+        "has_paved_shoulder": false,
+        "contractor_raw": "Classic Infrastructure",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.885116,
+          12.737289
+        ]
+      },
+      "properties": {
+        "id": 23,
+        "project_key": "NH-66-KA-71449357",
+        "nh_number": "NH-66",
+        "corridor_name": "6L Bridge on Palguni River near Kulur at Km. 368.849 (From k...",
+        "chainage_start_km": 368.849,
+        "chainage_end_km": null,
+        "package_label": null,
+        "lanes_min": 6,
+        "lanes_max": 6,
+        "has_paved_shoulder": false,
+        "contractor_raw": "Shinde Developers Private Ltd.",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          75.923364,
+          17.690752
+        ]
+      },
+      "properties": {
+        "id": 28,
+        "project_key": "NH-65-KA-273b41e4",
+        "nh_number": "NH-65",
+        "corridor_name": "Construction of Vehicular Underpass (VUP) at Km. 487.324 (Bl...",
+        "chainage_start_km": 487.324,
+        "chainage_end_km": null,
+        "package_label": null,
+        "lanes_min": 4,
+        "lanes_max": 6,
+        "has_paved_shoulder": false,
+        "contractor_raw": "KOTARKI Constructions Pvt Ltd",
+        "state_raw": "Karnataka, Telangana",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          75.809648,
+          17.740533
+        ]
+      },
+      "properties": {
+        "id": 29,
+        "project_key": "NH-65-KA-b8d6dee5",
+        "nh_number": "NH-65",
+        "corridor_name": "KNT Border to Sangareddy Section",
+        "chainage_start_km": 463.138,
+        "chainage_end_km": null,
+        "package_label": null,
+        "lanes_min": 4,
+        "lanes_max": 4,
+        "has_paved_shoulder": true,
+        "contractor_raw": "Ibha constructions Pvt. Ltd",
+        "state_raw": "Telangana",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          75.391484,
+          17.919777
+        ]
+      },
+      "properties": {
+        "id": 31,
+        "project_key": "NH-65-KA-825d5a1e",
+        "nh_number": "NH-65",
+        "corridor_name": "Long-term Rectification of MoRTH identified Blackspots by 1)...",
+        "chainage_start_km": 370.78,
+        "chainage_end_km": null,
+        "package_label": null,
+        "lanes_min": 4,
+        "lanes_max": 6,
+        "has_paved_shoulder": false,
+        "contractor_raw": "Shree Girrajjee Infra Heights Private Limited in JV with M/s Shiva Associates",
+        "state_raw": "Karnataka, Telangana",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.013265,
+            17.632727
+          ],
+          [
+            76.270079,
+            17.479911
+          ]
+        ]
+      },
+      "properties": {
+        "id": 33,
+        "project_key": "NH-150C-KA-85eb38d3",
+        "nh_number": "NH-150C",
+        "corridor_name": "6L of MH/KN Border (Nimbal Village) to KN/TS Border (Singnod...",
+        "chainage_start_km": 26.0,
+        "chainage_end_km": 97.0,
+        "package_label": "Pkg-II",
+        "lanes_min": 6,
+        "lanes_max": 6,
+        "has_paved_shoulder": false,
+        "contractor_raw": "PNC Infratech Pvt. Ltd.",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            77.094131,
+            16.615916
+          ],
+          [
+            77.285938,
+            16.356051
+          ]
+        ]
+      },
+      "properties": {
+        "id": 35,
+        "project_key": "NH-150C-KA-db0ebec5",
+        "nh_number": "NH-150C",
+        "corridor_name": "TS Border Section",
+        "chainage_start_km": 512.0,
+        "chainage_end_km": 548.4,
+        "package_label": null,
+        "lanes_min": 6,
+        "lanes_max": 6,
+        "has_paved_shoulder": false,
+        "contractor_raw": "G R Infraprojects Limited",
+        "state_raw": "Karnataka, Maharashtra",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.07284,
+          15.448754
+        ]
+      },
+      "properties": {
+        "id": 36,
+        "project_key": "NH-748A-KA-cff4daee",
+        "nh_number": "NH-748A",
+        "corridor_name": "Belgaum-Hungund-Raichur Section",
+        "chainage_start_km": 228.5,
+        "chainage_end_km": null,
+        "package_label": null,
+        "lanes_min": 4,
+        "lanes_max": 4,
+        "has_paved_shoulder": true,
+        "contractor_raw": "GR Infra Projects Ltd",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.070079,
+          15.466359
+        ]
+      },
+      "properties": {
+        "id": 37,
+        "project_key": "NH-748A-KA-48033bf5",
+        "nh_number": "NH-748A",
+        "corridor_name": "Belgaum-Hungund-Raichur Section",
+        "chainage_start_km": 182.3,
+        "chainage_end_km": null,
+        "package_label": null,
+        "lanes_min": 4,
+        "lanes_max": 4,
+        "has_paved_shoulder": true,
+        "contractor_raw": "GR Infra Projects Ltd",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.057073,
+          15.47353
+        ]
+      },
+      "properties": {
+        "id": 38,
+        "project_key": "NH-748A-KA-caaf68ce",
+        "nh_number": "NH-748A",
+        "corridor_name": "Belgaum-Hungund-Raichur Section",
+        "chainage_start_km": 136.1,
+        "chainage_end_km": null,
+        "package_label": null,
+        "lanes_min": 4,
+        "lanes_max": 4,
+        "has_paved_shoulder": true,
+        "contractor_raw": "Bekem Infra projects Pvt. Ltd-M/s DHD Infracon Private Limited ( consortium )",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.025059,
+          15.481024
+        ]
+      },
+      "properties": {
+        "id": 39,
+        "project_key": "NH-748A-KA-9462d9d1",
+        "nh_number": "NH-748A",
+        "corridor_name": "Belgaum-Hungund-Raichur Section",
+        "chainage_start_km": 89.9,
+        "chainage_end_km": null,
+        "package_label": null,
+        "lanes_min": 4,
+        "lanes_max": 4,
+        "has_paved_shoulder": true,
+        "contractor_raw": "Bekem Infra projects Pvt. Ltd-M/s DHD Infracon Private Limited ( consortium )",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.017566,
+          15.530448
+        ]
+      },
+      "properties": {
+        "id": 40,
+        "project_key": "NH-748A-KA-676af626",
+        "nh_number": "NH-748A",
+        "corridor_name": "Belgaum-Hungund-Raichur Section",
+        "chainage_start_km": 43.8,
+        "chainage_end_km": null,
+        "package_label": null,
+        "lanes_min": 4,
+        "lanes_max": 4,
+        "has_paved_shoulder": true,
+        "contractor_raw": "MKC Infrastructure Ltd.",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.971578,
+          15.528667
+        ]
+      },
+      "properties": {
+        "id": 41,
+        "project_key": "NH-748A-KA-df493516",
+        "nh_number": "NH-748A",
+        "corridor_name": "Belgaum- Hungund-Raichur Section",
+        "chainage_start_km": 0.0,
+        "chainage_end_km": null,
+        "package_label": null,
+        "lanes_min": 4,
+        "lanes_max": 4,
+        "has_paved_shoulder": true,
+        "contractor_raw": "DHD Infracon Private Limited M/S Bekem Infra projects Pvt. Ltd ( Consortium )",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.573026,
+            13.761917
+          ],
+          [
+            76.570772,
+            13.862426
+          ]
+        ]
+      },
+      "properties": {
+        "id": 43,
+        "project_key": "NH-150A-KA-9d99d088",
+        "nh_number": "NH-150A",
+        "corridor_name": "Bellary \u2013 Byrapura Section",
+        "chainage_start_km": 254.75,
+        "chainage_end_km": 266.837,
+        "package_label": null,
+        "lanes_min": 4,
+        "lanes_max": 4,
+        "has_paved_shoulder": false,
+        "contractor_raw": "SRC Infra Developers Private Limited",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.326386,
+            12.968382
+          ],
+          [
+            76.607845,
+            12.958364
+          ]
+        ]
+      },
+      "properties": {
+        "id": 44,
+        "project_key": "NH-75-KA-1b5d4bf4",
+        "nh_number": "NH-75",
+        "corridor_name": "drain in Bangalore-Hoskote-Mulbagal Section",
+        "chainage_start_km": 237.7,
+        "chainage_end_km": 318.0,
+        "package_label": null,
+        "lanes_min": 4,
+        "lanes_max": 6,
+        "has_paved_shoulder": false,
+        "contractor_raw": "JSR Constructions (P) Ltd",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.326386,
+            12.968382
+          ],
+          [
+            76.607845,
+            12.958364
+          ]
+        ]
+      },
+      "properties": {
+        "id": 45,
+        "project_key": "NH-75-KA-573133db",
+        "nh_number": "NH-75",
+        "corridor_name": "Blackspot in Bangalore- Hoskote- MulbagaI Section",
+        "chainage_start_km": 237.7,
+        "chainage_end_km": 318.0,
+        "package_label": null,
+        "lanes_min": 4,
+        "lanes_max": 6,
+        "has_paved_shoulder": false,
+        "contractor_raw": "Sree Bharamara Infrastructures Private Limited",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.326386,
+            12.968382
+          ],
+          [
+            76.607845,
+            12.958364
+          ]
+        ]
+      },
+      "properties": {
+        "id": 46,
+        "project_key": "NH-75-KA-b7521fb4",
+        "nh_number": "NH-75",
+        "corridor_name": "black spot in Bangalore-Hoskote-Mulbagal Section",
+        "chainage_start_km": 237.7,
+        "chainage_end_km": 318.0,
+        "package_label": null,
+        "lanes_min": 4,
+        "lanes_max": 6,
+        "has_paved_shoulder": false,
+        "contractor_raw": "SVS Mookambika Constructions Pvt. Ltd",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.326386,
+            12.968382
+          ],
+          [
+            76.607845,
+            12.958364
+          ]
+        ]
+      },
+      "properties": {
+        "id": 47,
+        "project_key": "NH-75-KA-46d0e5d8",
+        "nh_number": "NH-75",
+        "corridor_name": "spot in Bangalore -Hosket -Mulbagal Section",
+        "chainage_start_km": 237.7,
+        "chainage_end_km": 318.0,
+        "package_label": null,
+        "lanes_min": 4,
+        "lanes_max": 6,
+        "has_paved_shoulder": false,
+        "contractor_raw": "SVS Mookambika Constructions Pvt. Ltd",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.270781,
+            12.974006
+          ],
+          [
+            76.33167,
+            12.957192
+          ]
+        ]
+      },
+      "properties": {
+        "id": 48,
+        "project_key": "NH-75-KA-9b9ffd6d",
+        "nh_number": "NH-75",
+        "corridor_name": "KNT Border Section",
+        "chainage_start_km": 216.912,
+        "chainage_end_km": 239.1,
+        "package_label": null,
+        "lanes_min": 4,
+        "lanes_max": 6,
+        "has_paved_shoulder": false,
+        "contractor_raw": "Sree Bharamara Infrastructures Private Limited",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.270781,
+            12.974006
+          ],
+          [
+            76.33167,
+            12.957192
+          ]
+        ]
+      },
+      "properties": {
+        "id": 49,
+        "project_key": "NH-75-KA-9b9ffd6d-1",
+        "nh_number": "NH-75",
+        "corridor_name": "KNT Border Section",
+        "chainage_start_km": 216.912,
+        "chainage_end_km": 239.1,
+        "package_label": null,
+        "lanes_min": 4,
+        "lanes_max": 6,
+        "has_paved_shoulder": false,
+        "contractor_raw": "Ammapur Infrastructure Pvt. Ltd.",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.270781,
+            12.974006
+          ],
+          [
+            76.33167,
+            12.957192
+          ]
+        ]
+      },
+      "properties": {
+        "id": 50,
+        "project_key": "NH-75-KA-1926f89b",
+        "nh_number": "NH-75",
+        "corridor_name": "KNT border Section",
+        "chainage_start_km": 216.912,
+        "chainage_end_km": 239.1,
+        "package_label": null,
+        "lanes_min": 4,
+        "lanes_max": 6,
+        "has_paved_shoulder": false,
+        "contractor_raw": "SVS Mookambika Constructions Pvt. Ltd",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          76.336537,
+          12.947015
+        ]
+      },
+      "properties": {
+        "id": 51,
+        "project_key": "NH-75-KA-f738efbf",
+        "nh_number": "NH-75",
+        "corridor_name": "Mulbagal AP/KNT Border from Km 216+912 Km 239+100",
+        "chainage_start_km": 226.715,
+        "chainage_end_km": null,
+        "package_label": null,
+        "lanes_min": 4,
+        "lanes_max": 6,
+        "has_paved_shoulder": false,
+        "contractor_raw": "SVS Mookambika Constructions Pvt. Ltd",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            75.364087,
+            12.845493
+          ],
+          [
+            75.343017,
+            12.847909
+          ]
+        ]
+      },
+      "properties": {
+        "id": 54,
+        "project_key": "NH-75-KA-385024e9",
+        "nh_number": "NH-75",
+        "corridor_name": "in NelamangalaDevihalli Section",
+        "chainage_start_km": 71.6,
+        "chainage_end_km": 73.9,
+        "package_label": null,
+        "lanes_min": 4,
+        "lanes_max": 4,
+        "has_paved_shoulder": false,
+        "contractor_raw": "National Infrabuild Private Limited",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          75.606616,
+          12.829323
+        ]
+      },
+      "properties": {
+        "id": 56,
+        "project_key": "NH-75-KA-9fd2c3f9",
+        "nh_number": "NH-75",
+        "corridor_name": "Construction of Light Vehicular Underpass (LVUP) at Km. 112....",
+        "chainage_start_km": 112.917,
+        "chainage_end_km": null,
+        "package_label": null,
+        "lanes_min": 4,
+        "lanes_max": 4,
+        "has_paved_shoulder": false,
+        "contractor_raw": "Hindustan Construction",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.55844,
+            12.94962
+          ],
+          [
+            76.576938,
+            12.953016
+          ]
+        ]
+      },
+      "properties": {
+        "id": 61,
+        "project_key": "NH-75-KA-32978eaa",
+        "nh_number": "NH-75",
+        "corridor_name": "to Bantwal Cross Section",
+        "chainage_start_km": 311.57,
+        "chainage_end_km": 313.67,
+        "package_label": null,
+        "lanes_min": 4,
+        "lanes_max": 4,
+        "has_paved_shoulder": false,
+        "contractor_raw": "KNR Constructions Limited",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.869731,
+          12.76853
+        ]
+      },
+      "properties": {
+        "id": 64,
+        "project_key": "NH-66-KA-66f1a141",
+        "nh_number": "NH-66",
+        "corridor_name": "New Mangalore Port Road Connectivity stretch from Surathkal Nantoor",
+        "chainage_start_km": 375.3,
+        "chainage_end_km": null,
+        "package_label": null,
+        "lanes_min": 4,
+        "lanes_max": 4,
+        "has_paved_shoulder": true,
+        "contractor_raw": "Krishi Infratech",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            75.219469,
+            12.739258
+          ],
+          [
+            76.008209,
+            12.411964
+          ]
+        ]
+      },
+      "properties": {
+        "id": 67,
+        "project_key": "NH-275-KA-4aca69a4",
+        "nh_number": "NH-275",
+        "corridor_name": "Additional works under BM1 to ensure road safety under 6L of...",
+        "chainage_start_km": 17.3,
+        "chainage_end_km": 136.3,
+        "package_label": null,
+        "lanes_min": 6,
+        "lanes_max": 6,
+        "has_paved_shoulder": false,
+        "contractor_raw": "Dhariwal Buildtech Limited",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          75.220575,
+          12.733094
+        ]
+      },
+      "properties": {
+        "id": 68,
+        "project_key": "NH-275-KA-26c91956",
+        "nh_number": "NH-275",
+        "corridor_name": "Locations in Bangalore Nidagatta Mysore Section",
+        "chainage_start_km": 18.0,
+        "chainage_end_km": null,
+        "package_label": null,
+        "lanes_min": 6,
+        "lanes_max": 6,
+        "has_paved_shoulder": false,
+        "contractor_raw": "KKB Engineering and Constructions Pvt. Ltd",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.074637,
+          12.140946
+        ]
+      },
+      "properties": {
+        "id": 69,
+        "project_key": "NH-766-KA-f4314fdd",
+        "nh_number": "NH-766",
+        "corridor_name": "Kollegala-Mysore- Gundlupete Section",
+        "chainage_start_km": 251.45,
+        "chainage_end_km": null,
+        "package_label": null,
+        "lanes_min": 2,
+        "lanes_max": 4,
+        "has_paved_shoulder": true,
+        "contractor_raw": "H B Ravi Kumar",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          75.926982,
+          15.391137
+        ]
+      },
+      "properties": {
+        "id": 72,
+        "project_key": "NH-67-KA-4ef6fb66",
+        "nh_number": "NH-67",
+        "corridor_name": "4L of Left-Over Works of Hospet- Bellary -Karnataka/AP borde...",
+        "chainage_start_km": 280.08,
+        "chainage_end_km": null,
+        "package_label": null,
+        "lanes_min": 4,
+        "lanes_max": 4,
+        "has_paved_shoulder": false,
+        "contractor_raw": "SRC Infra Developers Private Limited",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            75.300124,
+            15.363364
+          ],
+          [
+            75.865541,
+            15.388138
+          ]
+        ]
+      },
+      "properties": {
+        "id": 73,
+        "project_key": "NH-67-KA-db2c65fe",
+        "nh_number": "NH-67",
+        "corridor_name": "Hubli- Hospet Section",
+        "chainage_start_km": 128.85,
+        "chainage_end_km": 272.571,
+        "package_label": null,
+        "lanes_min": 4,
+        "lanes_max": 4,
+        "has_paved_shoulder": false,
+        "contractor_raw": "Morphing Inovations (OPC) Pvt. Ltd.",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.370738,
+            14.996637
+          ],
+          [
+            76.313536,
+            15.360342
+          ]
+        ]
+      },
+      "properties": {
+        "id": 78,
+        "project_key": "NH-50-KA-44fa504f",
+        "nh_number": "NH-50",
+        "corridor_name": "the 4 lane Bijapur-Hungund Section",
+        "chainage_start_km": 225.8,
+        "chainage_end_km": 323.012,
+        "package_label": null,
+        "lanes_min": 6,
+        "lanes_max": 6,
+        "has_paved_shoulder": false,
+        "contractor_raw": "H P Madhukar & Co",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.306389,
+            15.401582
+          ],
+          [
+            76.305228,
+            15.411396
+          ]
+        ]
+      },
+      "properties": {
+        "id": 79,
+        "project_key": "NH-50-KA-4285ff1f",
+        "nh_number": "NH-50",
+        "corridor_name": "in Hungund to Hospet Section",
+        "chainage_start_km": 329.68,
+        "chainage_end_km": 330.78,
+        "package_label": null,
+        "lanes_min": 4,
+        "lanes_max": 6,
+        "has_paved_shoulder": false,
+        "contractor_raw": "S S Alur Construction Company",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          76.269549,
+          15.485075
+        ]
+      },
+      "properties": {
+        "id": 80,
+        "project_key": "NH-50-KA-213b3aac",
+        "nh_number": "NH-50",
+        "corridor_name": "Hospete-Chitradurga Section",
+        "chainage_start_km": 361.0,
+        "chainage_end_km": null,
+        "package_label": null,
+        "lanes_min": 4,
+        "lanes_max": 4,
+        "has_paved_shoulder": false,
+        "contractor_raw": "Govindaraj Contractor and Earth Movers",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.360444,
+            15.243267
+          ],
+          [
+            76.17272,
+            15.833709
+          ]
+        ]
+      },
+      "properties": {
+        "id": 81,
+        "project_key": "NH-50-KA-e4710f62",
+        "nh_number": "NH-50",
+        "corridor_name": "in Hospete to Chitradurga road Section",
+        "chainage_start_km": 299.0,
+        "chainage_end_km": 418.75,
+        "package_label": null,
+        "lanes_min": 4,
+        "lanes_max": 6,
+        "has_paved_shoulder": false,
+        "contractor_raw": "Classic Infrastructure",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.063426,
+            12.357266
+          ],
+          [
+            76.258768,
+            12.311889
+          ]
+        ]
+      },
+      "properties": {
+        "id": 82,
+        "project_key": "NH-275-KA-a8291676",
+        "nh_number": "NH-275",
+        "corridor_name": "Hunsur - KR Nagar Jn Section",
+        "chainage_start_km": 144.9,
+        "chainage_end_km": 169.0,
+        "package_label": null,
+        "lanes_min": 4,
+        "lanes_max": 4,
+        "has_paved_shoulder": false,
+        "contractor_raw": "Ramalingam Construction Company Pvt. Ltd",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            75.904331,
+            12.43835
+          ],
+          [
+            76.063426,
+            12.357266
+          ]
+        ]
+      },
+      "properties": {
+        "id": 83,
+        "project_key": "NH-275-KA-592e5130",
+        "nh_number": "NH-275",
+        "corridor_name": "4L PS from Near Guddehosur to Start of Kushalnagara Bypass t...",
+        "chainage_start_km": 122.2,
+        "chainage_end_km": 144.9,
+        "package_label": null,
+        "lanes_min": 4,
+        "lanes_max": 4,
+        "has_paved_shoulder": true,
+        "contractor_raw": "D. Y. Uppar and Sons - KMC Constructions Limited (JV)",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.258768,
+            12.311889
+          ],
+          [
+            76.487254,
+            12.333893
+          ]
+        ]
+      },
+      "properties": {
+        "id": 84,
+        "project_key": "NH-275-KA-09898746",
+        "nh_number": "NH-275",
+        "corridor_name": "4L PS from near Hunsur - KR Nagar Junction to near Yalachaha...",
+        "chainage_start_km": 169.0,
+        "chainage_end_km": 195.55,
+        "package_label": "Pkg-IV",
+        "lanes_min": 4,
+        "lanes_max": 4,
+        "has_paved_shoulder": true,
+        "contractor_raw": "KNR Constructions Limited",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          76.516453,
+          12.353645
+        ]
+      },
+      "properties": {
+        "id": 85,
+        "project_key": "NH-275-KA-56865cee",
+        "nh_number": "NH-275",
+        "corridor_name": "4L PS from near Yalachahalli village KR Nagara - Yelawala Ro...",
+        "chainage_start_km": 214.535,
+        "chainage_end_km": null,
+        "package_label": "Pkg-V",
+        "lanes_min": 4,
+        "lanes_max": 4,
+        "has_paved_shoulder": true,
+        "contractor_raw": "KNR Constructions Limited",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            74.863793,
+            12.869385
+          ],
+          [
+            74.951691,
+            12.87389
+          ]
+        ]
+      },
+      "properties": {
+        "id": 86,
+        "project_key": "NH-73-KA-5d8e3917",
+        "nh_number": "NH-73",
+        "corridor_name": "Tumakuru Shivamogga Section",
+        "chainage_start_km": 0.0,
+        "chainage_end_km": 12.3,
+        "package_label": null,
+        "lanes_min": 2,
+        "lanes_max": 4,
+        "has_paved_shoulder": true,
+        "contractor_raw": "Raj Promoters & Civil Engineers Pvt Ltd.",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            75.566884,
+            13.919792
+          ],
+          [
+            75.566884,
+            13.919792
+          ]
+        ]
+      },
+      "properties": {
+        "id": 91,
+        "project_key": "NH-169-KA-c0c6a13a",
+        "nh_number": "NH-169",
+        "corridor_name": "Sannur to Bikarnakatte Section",
+        "chainage_start_km": 691.35,
+        "chainage_end_km": 736.362,
+        "package_label": null,
+        "lanes_min": 4,
+        "lanes_max": 4,
+        "has_paved_shoulder": false,
+        "contractor_raw": "Dilip Buildcon Ltd.",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.376216,
+            14.911226
+          ],
+          [
+            76.173538,
+            15.827011
+          ]
+        ]
+      },
+      "properties": {
+        "id": 92,
+        "project_key": "NH-50-KA-7711ecf1",
+        "nh_number": "NH-50",
+        "corridor_name": "Bijapur-Gulbarga- Humnabad Section",
+        "chainage_start_km": 195.1,
+        "chainage_end_km": 418.0,
+        "package_label": null,
+        "lanes_min": 2,
+        "lanes_max": 4,
+        "has_paved_shoulder": true,
+        "contractor_raw": "KKB Engineering and Constructions Pvt. Ltd",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.926674,
+            11.935963
+          ],
+          [
+            76.667308,
+            12.242073
+          ]
+        ]
+      },
+      "properties": {
+        "id": 96,
+        "project_key": "NH-150A-KA-5e8aca77",
+        "nh_number": "NH-150A",
+        "corridor_name": "Short Term Recitification of 5 nos. of blackspots of Jewargi...",
+        "chainage_start_km": 0.0,
+        "chainage_end_km": 50.0,
+        "package_label": null,
+        "lanes_min": 2,
+        "lanes_max": 2,
+        "has_paved_shoulder": false,
+        "contractor_raw": "Arjunvaishnavi Infrastructure and Developers Pvt. Ltd.",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.926674,
+            11.935963
+          ],
+          [
+            76.667308,
+            12.242073
+          ]
+        ]
+      },
+      "properties": {
+        "id": 97,
+        "project_key": "NH-150A-KA-f7a224e7",
+        "nh_number": "NH-150A",
+        "corridor_name": "Jevargi \u2013 Shahapur Section",
+        "chainage_start_km": 0.0,
+        "chainage_end_km": 50.0,
+        "package_label": null,
+        "lanes_min": 2,
+        "lanes_max": 2,
+        "has_paved_shoulder": false,
+        "contractor_raw": "L Kasi Reddy",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            76.926674,
+            11.935963
+          ],
+          [
+            76.667308,
+            12.242073
+          ]
+        ]
+      },
+      "properties": {
+        "id": 99,
+        "project_key": "NH-150A-KA-eb674ce2",
+        "nh_number": "NH-150A",
+        "corridor_name": "Jewargi- Shahapur Section",
+        "chainage_start_km": 0.0,
+        "chainage_end_km": 50.0,
+        "package_label": null,
+        "lanes_min": 2,
+        "lanes_max": 2,
+        "has_paved_shoulder": false,
+        "contractor_raw": "G.R Engineers & Contractors",
+        "state_raw": "Karnataka",
+        "source_document": "Under_implementation_MIS_august.pdf",
+        "geocode_method": "osm_chainage_linear_interpolation",
+        "geocode_confidence": "approximate"
+      }
+    }
+  ]
+};
+    const EMBEDDED_UNPLACED = [
+  {
+    "id": 1,
+    "project_key": "NE-7-KA-9fcc651a",
+    "nh_number": "NE-7",
+    "corridor_name": "Strengthening of Mulbagal\u2013Tayalur\u2013Sundarpalya Road connectin...",
+    "chainage_start_km": null,
+    "chainage_end_km": null,
+    "contractor_raw": "BMC Gowda Constructions,",
+    "state_raw": "Karnataka",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "No chainage data in source document"
+  },
+  {
+    "id": 3,
+    "project_key": "NH-4-KA-ae96fd1a",
+    "nh_number": "NH-4",
+    "corridor_name": "Bangalore - Pune Section",
+    "chainage_start_km": null,
+    "chainage_end_km": null,
+    "contractor_raw": "APS Hydro Private Limited - R&C Infra engineers Private Limited (JV)",
+    "state_raw": "Karnataka",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "Uses pre-2010 NH numbering (NH-4) \u2014 needs manual review before mapping to current alignment"
+  },
+  {
+    "id": 5,
+    "project_key": "NH-48-KA-a89f7619",
+    "nh_number": "NH-48",
+    "corridor_name": "Hubli-Haveri Section",
+    "chainage_start_km": null,
+    "chainage_end_km": null,
+    "contractor_raw": "M G Arunkumar",
+    "state_raw": "Karnataka",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "No chainage data in source document"
+  },
+  {
+    "id": 10,
+    "project_key": "NH-4-KA-9dc1a5af",
+    "nh_number": "NH-4",
+    "corridor_name": "Tumkur - Nelamangala (6L)",
+    "chainage_start_km": null,
+    "chainage_end_km": null,
+    "contractor_raw": "H.G. Infra Engineering Limited",
+    "state_raw": "Karnataka",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "Uses pre-2010 NH numbering (NH-4) \u2014 needs manual review before mapping to current alignment"
+  },
+  {
+    "id": 11,
+    "project_key": "NH-48-KA-96d2c87d",
+    "nh_number": "NH-48",
+    "corridor_name": "Bangalore-Nelamangala Section",
+    "chainage_start_km": null,
+    "chainage_end_km": null,
+    "contractor_raw": "Freyssinet Prestressed Concrete Co. Ltd",
+    "state_raw": "Karnataka",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "No chainage data in source document"
+  },
+  {
+    "id": 13,
+    "project_key": "NH-648-KA-492c6bc7",
+    "nh_number": "NH-648",
+    "corridor_name": "Bangalore/TN border to Hoskote",
+    "chainage_start_km": null,
+    "chainage_end_km": null,
+    "contractor_raw": "S&P Infrastructure Developers Pvt. Ltd. - Skylark Infra Engineering Pvt. Ltd. (JV)",
+    "state_raw": "Karnataka",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "No chainage data in source document"
+  },
+  {
+    "id": 14,
+    "project_key": "NH-948A-KA-3263ba34",
+    "nh_number": "NH-948A",
+    "corridor_name": "Bangalore Ring Road (STRR)-NH- 948A- Package-I of Phase-III ...",
+    "chainage_start_km": null,
+    "chainage_end_km": null,
+    "contractor_raw": "Montecarlo Balagondapalli Highway Private Ltd",
+    "state_raw": "Karnataka, Tamil Nadu",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "No chainage data in source document"
+  },
+  {
+    "id": 16,
+    "project_key": "NH-UNASSIGNED-KA-1758c82f",
+    "nh_number": null,
+    "corridor_name": "Silk Board junction to KA/TN Border",
+    "chainage_start_km": null,
+    "chainage_end_km": null,
+    "contractor_raw": "Dhariwal Buildtech Limited",
+    "state_raw": "Karnataka",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "No NH number specified in source document"
+  },
+  {
+    "id": 20,
+    "project_key": "NH-844-KA-4883dad7",
+    "nh_number": "NH-844",
+    "corridor_name": "Hosur to Dhamrapuri (Pkg-1) [Neraluru - Thorapalli Agraharam...",
+    "chainage_start_km": null,
+    "chainage_end_km": null,
+    "contractor_raw": "SCC Infrastructure Private Limited",
+    "state_raw": "Karnataka, Tamil Nadu",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "No chainage data in source document"
+  },
+  {
+    "id": 24,
+    "project_key": "NH-UNASSIGNED-KA-55db6677",
+    "nh_number": null,
+    "corridor_name": "Permanent rectification of Black spot KA-(02)-304 by constru...",
+    "chainage_start_km": 313.65,
+    "chainage_end_km": 314.72,
+    "contractor_raw": "The Trinity Group",
+    "state_raw": "Karnataka",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "No NH number specified in source document"
+  },
+  {
+    "id": 25,
+    "project_key": "NH-UNASSIGNED-KA-53c26cbf",
+    "nh_number": null,
+    "corridor_name": "PermanentRectification of Blackspot KA-(02)-373 by Construct...",
+    "chainage_start_km": 319.56,
+    "chainage_end_km": 320.84,
+    "contractor_raw": "Karla Construction",
+    "state_raw": "Karnataka",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "No NH number specified in source document"
+  },
+  {
+    "id": 26,
+    "project_key": "NH-UNASSIGNED-KA-c215a9d9",
+    "nh_number": null,
+    "corridor_name": "Strengthening of Kundapur (Km.283.300) to Surathkal (Km358.6...",
+    "chainage_start_km": 283.3,
+    "chainage_end_km": null,
+    "contractor_raw": "Udupi Tollway Pvt Ltd.",
+    "state_raw": "Karnataka",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "No NH number specified in source document"
+  },
+  {
+    "id": 27,
+    "project_key": "NH-UNASSIGNED-KA-7360037e",
+    "nh_number": null,
+    "corridor_name": "Kundapur to Suratkal Section",
+    "chainage_start_km": null,
+    "chainage_end_km": null,
+    "contractor_raw": "National Infrabuild Private Limited",
+    "state_raw": "Karnataka",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "No NH number specified in source document"
+  },
+  {
+    "id": 30,
+    "project_key": "NH-65-KA-5a8a5e38",
+    "nh_number": "NH-65",
+    "corridor_name": "KN Border - Sangareddy Section",
+    "chainage_start_km": null,
+    "chainage_end_km": null,
+    "contractor_raw": "L&T infrastructure development projects ltd",
+    "state_raw": "Karnataka, Telangana",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "No chainage data in source document"
+  },
+  {
+    "id": 32,
+    "project_key": "NH-UNASSIGNED-KA-ed5f624e",
+    "nh_number": null,
+    "corridor_name": "Construction of Foot Over Bridge at Ch.137+570 and Ch.135+62...",
+    "chainage_start_km": 137.57,
+    "chainage_end_km": null,
+    "contractor_raw": "Dhingra Brothers (India)",
+    "state_raw": "Maharashtra",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "No NH number specified in source document"
+  },
+  {
+    "id": 34,
+    "project_key": "NH-UNASSIGNED-KA-a895e8a6",
+    "nh_number": null,
+    "corridor_name": "6L of MH/KN Border (Nimbal Village) to KN/TS Border (Singnod...",
+    "chainage_start_km": 97.0,
+    "chainage_end_km": 162.5,
+    "contractor_raw": "Dilip Buildcon Ltd.",
+    "state_raw": "Karnataka",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "No NH number specified in source document"
+  },
+  {
+    "id": 42,
+    "project_key": "NH-UNASSIGNED-KA-89fb82d8",
+    "nh_number": null,
+    "corridor_name": "Sanquelim - Belagavi Section",
+    "chainage_start_km": null,
+    "chainage_end_km": null,
+    "contractor_raw": "M.B Kallur Infrastructure Company",
+    "state_raw": "Karnataka",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "No NH number specified in source document"
+  },
+  {
+    "id": 52,
+    "project_key": "NH-75-KA-77429393",
+    "nh_number": "NH-75",
+    "corridor_name": "Devihalli- Hassan Section",
+    "chainage_start_km": null,
+    "chainage_end_km": null,
+    "contractor_raw": "Abdul Kalam Azad",
+    "state_raw": "Karnataka",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "No chainage data in source document"
+  },
+  {
+    "id": 53,
+    "project_key": "NH-75-KA-acf4ddbe",
+    "nh_number": "NH-75",
+    "corridor_name": "Nelamangala to Devihalli Section",
+    "chainage_start_km": null,
+    "chainage_end_km": null,
+    "contractor_raw": "G.R Engineers & Contractors",
+    "state_raw": "Karnataka",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "No chainage data in source document"
+  },
+  {
+    "id": 55,
+    "project_key": "NH-75-KA-93c5bf24",
+    "nh_number": "NH-75",
+    "corridor_name": "Strengthing of Devihalli-Hassan (DBM+BC)",
+    "chainage_start_km": null,
+    "chainage_end_km": null,
+    "contractor_raw": "A. D. Construction",
+    "state_raw": "Karnataka",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "No chainage data in source document"
+  },
+  {
+    "id": 57,
+    "project_key": "NH-75-KA-53c2a094",
+    "nh_number": "NH-75",
+    "corridor_name": "Palya, Ballupet and Sakaleshpura on NH-75",
+    "chainage_start_km": null,
+    "chainage_end_km": null,
+    "contractor_raw": "Rajesab I Banagar",
+    "state_raw": "Karnataka",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "No chainage data in source document"
+  },
+  {
+    "id": 58,
+    "project_key": "NH-75-KA-9d885e7a",
+    "nh_number": "NH-75",
+    "corridor_name": "Hassan \u2013Marnahally Section",
+    "chainage_start_km": null,
+    "chainage_end_km": null,
+    "contractor_raw": "MD-Infra India Pvt. Ltd.",
+    "state_raw": "Karnataka",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "No chainage data in source document"
+  },
+  {
+    "id": 59,
+    "project_key": "NH-75-KA-1b7ddd43",
+    "nh_number": "NH-75",
+    "corridor_name": "at identified locations at ghat Section",
+    "chainage_start_km": null,
+    "chainage_end_km": null,
+    "contractor_raw": "MD-Infra India Pvt. Ltd.",
+    "state_raw": "Karnataka",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "No chainage data in source document"
+  },
+  {
+    "id": 60,
+    "project_key": "NH-75-KA-f35a6899",
+    "nh_number": "NH-75",
+    "corridor_name": "NH75 Hassan Maranahalli Section",
+    "chainage_start_km": null,
+    "chainage_end_km": null,
+    "contractor_raw": "MD-Infra India Pvt. Ltd.",
+    "state_raw": "Karnataka",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "No chainage data in source document"
+  },
+  {
+    "id": 62,
+    "project_key": "NH-UNASSIGNED-KA-3cc9dd01",
+    "nh_number": null,
+    "corridor_name": "Strengthening of B.C. Road - Padil (Suratkal-Nantur)(New Man...",
+    "chainage_start_km": null,
+    "chainage_end_km": null,
+    "contractor_raw": "T. R Infra Project",
+    "state_raw": "Karnataka",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "No NH number specified in source document"
+  },
+  {
+    "id": 63,
+    "project_key": "NH-UNASSIGNED-KA-0e2034d3",
+    "nh_number": null,
+    "corridor_name": "Strengthening of Surathkal to Nanthoor on NH-66 and BC Road ...",
+    "chainage_start_km": null,
+    "chainage_end_km": null,
+    "contractor_raw": "Mugrody Constructions",
+    "state_raw": "Karnataka",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "No NH number specified in source document"
+  },
+  {
+    "id": 65,
+    "project_key": "NH-75-KA-9261dac1",
+    "nh_number": "NH-75",
+    "corridor_name": "structures in Devihalli - Hassan Section",
+    "chainage_start_km": null,
+    "chainage_end_km": null,
+    "contractor_raw": "Power Mech Projects Ltd. - SRC Infra Developers Pvt. Ltd.",
+    "state_raw": "Karnataka",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "No chainage data in source document"
+  },
+  {
+    "id": 66,
+    "project_key": "NH-275-KA-9360b614",
+    "nh_number": "NH-275",
+    "corridor_name": "limit in Bangalore to Mysore Section",
+    "chainage_start_km": null,
+    "chainage_end_km": null,
+    "contractor_raw": "Associated Engineers",
+    "state_raw": "Karnataka",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "No chainage data in source document"
+  },
+  {
+    "id": 70,
+    "project_key": "NH-UNASSIGNED-KA-d1feabf3",
+    "nh_number": null,
+    "corridor_name": "along Kerala Border to Kollegal Section",
+    "chainage_start_km": 177.348,
+    "chainage_end_km": null,
+    "contractor_raw": "Krishi Infratech",
+    "state_raw": "Karnataka",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "No NH number specified in source document"
+  },
+  {
+    "id": 71,
+    "project_key": "NH-766-KA-01a442f4",
+    "nh_number": "NH-766",
+    "corridor_name": "along Kerala Border to Kollegala Section",
+    "chainage_start_km": null,
+    "chainage_end_km": null,
+    "contractor_raw": "Kousic & Co.",
+    "state_raw": "Karnataka",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "No chainage data in source document"
+  },
+  {
+    "id": 74,
+    "project_key": "NH-766E-KA-583c4bc7",
+    "nh_number": "NH-766E",
+    "corridor_name": "Yekkambi-Haveri",
+    "chainage_start_km": null,
+    "chainage_end_km": null,
+    "contractor_raw": "Ammapur Infrastructure Pvt. Ltd.",
+    "state_raw": "Karnataka",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "No chainage data in source document"
+  },
+  {
+    "id": 75,
+    "project_key": "NH-UNASSIGNED-KA-2b4c36ee",
+    "nh_number": null,
+    "corridor_name": "Belakeri Port to Kumta - Sirsi road from km 0.00 - km 4.265 ...",
+    "chainage_start_km": null,
+    "chainage_end_km": null,
+    "contractor_raw": "R.N.S. Infrastructure Ltd. Gayatri Projects Ltd (JV)",
+    "state_raw": "Karnataka",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "No NH number specified in source document"
+  },
+  {
+    "id": 76,
+    "project_key": "NH-52-KA-7734fd15",
+    "nh_number": "NH-52",
+    "corridor_name": "Construction of service road from ch.73+380 to ch.74+210 RHS...",
+    "chainage_start_km": null,
+    "chainage_end_km": null,
+    "contractor_raw": "Deokar Earthmovers",
+    "state_raw": "Karnataka",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "No chainage data in source document"
+  },
+  {
+    "id": 77,
+    "project_key": "NH-50-KA-c08946b9",
+    "nh_number": "NH-50",
+    "corridor_name": "the 4-lane Bijapur- Hungund Section",
+    "chainage_start_km": null,
+    "chainage_end_km": null,
+    "contractor_raw": "N. S. Nayak & Sons",
+    "state_raw": "Karnataka",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "No chainage data in source document"
+  },
+  {
+    "id": 87,
+    "project_key": "NH-UNASSIGNED-KA-db7a6d27",
+    "nh_number": null,
+    "corridor_name": "2 lane Section",
+    "chainage_start_km": 53.8,
+    "chainage_end_km": null,
+    "contractor_raw": "NSC Projects Private Limited - MD-Infra India Pvt. Ltd. (Joint Venture)",
+    "state_raw": "Karnataka",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "No NH number specified in source document"
+  },
+  {
+    "id": 88,
+    "project_key": "NH-73-KA-75df5f6e",
+    "nh_number": "NH-73",
+    "corridor_name": "Arasikere Tank Bund Section",
+    "chainage_start_km": null,
+    "chainage_end_km": null,
+    "contractor_raw": "BMRG PROJECTS (INDIA) PVT",
+    "state_raw": "Karnataka",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "No chainage data in source document"
+  },
+  {
+    "id": 89,
+    "project_key": "NH-73-KA-65b4e3f2",
+    "nh_number": "NH-73",
+    "corridor_name": "Strengthening and one time improvement of existing stretch o...",
+    "chainage_start_km": null,
+    "chainage_end_km": null,
+    "contractor_raw": "Ganesh Ram Dokania",
+    "state_raw": "Karnataka",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "No chainage data in source document"
+  },
+  {
+    "id": 90,
+    "project_key": "NH-206-KA-9a8cae57",
+    "nh_number": "NH-206",
+    "corridor_name": "Bettadahalli- Shivamogga Section",
+    "chainage_start_km": 170.415,
+    "chainage_end_km": null,
+    "contractor_raw": "Ashoka Buildcon Limited",
+    "state_raw": "Karnataka",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "Uses pre-2010 NH numbering (NH-206) \u2014 needs manual review before mapping to current alignment"
+  },
+  {
+    "id": 93,
+    "project_key": "NH-50-KA-79304e0c",
+    "nh_number": "NH-50",
+    "corridor_name": "INCIDENT MANAGEMENT SERVICES FOR THE STRETCH UNDER KANNOLLI ...",
+    "chainage_start_km": null,
+    "chainage_end_km": null,
+    "contractor_raw": "K L Enterprises",
+    "state_raw": "Karnataka",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "No chainage data in source document"
+  },
+  {
+    "id": 94,
+    "project_key": "NH-4A-KA-7fce8d57",
+    "nh_number": "NH-4A",
+    "corridor_name": "GOA Border Section",
+    "chainage_start_km": 30.8,
+    "chainage_end_km": 70.8,
+    "contractor_raw": "V.M. Matere Infrastructures (India) Pvt.Ltd.",
+    "state_raw": "Karnataka",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "Uses pre-2010 NH numbering (NH-4A) \u2014 needs manual review before mapping to current alignment"
+  },
+  {
+    "id": 95,
+    "project_key": "NH-748-KA-2cfcfb31",
+    "nh_number": "NH-748",
+    "corridor_name": "WHITETOPING AND RECONSTRUCTION OF LEFT OUT SECTION OF KHANAP...",
+    "chainage_start_km": null,
+    "chainage_end_km": null,
+    "contractor_raw": "Shri. Prashanth Tukaram Kagal",
+    "state_raw": "Karnataka",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "No chainage data in source document"
+  },
+  {
+    "id": 98,
+    "project_key": "NH-150A-KA-dffbb6e8",
+    "nh_number": "NH-150A",
+    "corridor_name": "Jevargi \u2013 Shahapur Section",
+    "chainage_start_km": null,
+    "chainage_end_km": null,
+    "contractor_raw": "KKB Engineering and Constructions Pvt. Ltd",
+    "state_raw": "Karnataka",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "No chainage data in source document"
+  },
+  {
+    "id": 100,
+    "project_key": "NH-UNASSIGNED-KA-99b2dd34",
+    "nh_number": null,
+    "corridor_name": "Construction of Vehicular Underpass (VUP) structure between ...",
+    "chainage_start_km": 368.7,
+    "chainage_end_km": 368.82,
+    "contractor_raw": "National Infrabuild Private Limited",
+    "state_raw": "Karnataka",
+    "source_document": "Under_implementation_MIS_august.pdf",
+    "reason": "No NH number specified in source document"
+  }
+];
+
+    // Initialize Leaflet Map centered on Karnataka
+    const map = L.map('map', {
+      zoomControl: true,
+      attributionControl: true
+    }).setView([14.5, 75.8], 7);
+
+    // OpenStreetMap Base Tiles with Sepia/Parchment filter
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> | NHAI Karnataka Audit'
+    }).addTo(map);
+
+    // Fit to Karnataka Geographic Bounds
+    const karnatakaBounds = L.latLngBounds(
+      L.latLng(11.5, 74.0),
+      L.latLng(18.5, 78.6)
+    );
+    map.fitBounds(karnatakaBounds, { padding: [20, 20] });
+
+    function createCadastralPopup(props) {
+      const chStart = props.chainage_start_km !== null ? `Km ${props.chainage_start_km}` : 'N/A';
+      const chEnd = props.chainage_end_km !== null ? `Km ${props.chainage_end_km}` : 'N/A';
+      const contractor = props.contractor_raw || 'Not specified';
+      const nh = props.nh_number || 'UNASSIGNED';
+      const pkg = props.package_label || 'Main Contract';
+      const lanes = (props.lanes_min && props.lanes_max) ? `${props.lanes_min}L – ${props.lanes_max}L` : 'Standard';
+
+      return `
+        <div class="cadastral-card-header">
+          <span class="cadastral-seal">ENTRY SLIP &bull; RECORD</span>
+          <span class="cadastral-nh-badge">${nh}</span>
+        </div>
+        <div class="cadastral-corridor-title">${props.corridor_name || 'Highway Section'}</div>
+        <table class="cadastral-fields-table">
+          <tr>
+            <td class="field-label">AUDIT KEY</td>
+            <td class="field-value">${props.project_key}</td>
+          </tr>
+          <tr>
+            <td class="field-label">CHAINAGE</td>
+            <td class="field-value">${chStart} &rarr; ${chEnd}</td>
+          </tr>
+          <tr>
+            <td class="field-label">PACKAGE</td>
+            <td class="field-value">${pkg} (${lanes})</td>
+          </tr>
+          <tr>
+            <td class="field-label">CONTRACTOR</td>
+            <td class="field-value">${contractor}</td>
+          </tr>
+        </table>
+        <div class="cadastral-card-footer">
+          <span>Survey Ref: OSM Linear Int.</span>
+          <span>Conf: Approx.</span>
+        </div>
+      `;
+    }
+
+    function renderMapFeatures(geojsonData) {
+      L.geoJSON(geojsonData, {
+        style: function (feature) {
+          return {
+            color: '#3e562c',       // Deep moss green
+            weight: 4.5,
+            opacity: 0.9,
+            lineCap: 'round',
+            lineJoin: 'round'
+          };
+        },
+        pointToLayer: function (feature, latlng) {
+          return L.circleMarker(latlng, {
+            radius: 6,
+            fillColor: '#3e562c',
+            color: '#1e2d14',
+            weight: 1.5,
+            opacity: 1,
+            fillOpacity: 0.9
+          });
+        },
+        onEachFeature: function (feature, layer) {
+          if (feature.properties) {
+            layer.bindPopup(createCadastralPopup(feature.properties));
+          }
+        }
+      }).addTo(map);
+    }
+
+    function renderUnplacedRegister(unplacedData, placedCount) {
+      const totalCount = placedCount + unplacedData.length;
+      const flaggedCount = unplacedData.filter(p => p.reason && p.reason.includes('pre-2010')).length;
+      const failedCount = unplacedData.length - flaggedCount;
+
+      const summaryElem = document.getElementById('coverageSummary');
+      summaryElem.innerHTML = `
+        <div class="stat-main">
+          Enrollment: <span class="count-highlight">${placedCount} of ${totalCount}</span> Projects Placed
+        </div>
+        <div class="stat-breakdown">
+          <span class="stat-pill"><span class="stamp-dot moss"></span> <strong>${placedCount}</strong> alignments charted on survey grid</span>
+          <span class="stat-pill"><span class="stamp-dot rust"></span> <strong>${failedCount}</strong> excluded (missing chainage / highway ID)</span>
+          <span class="stat-pill"><span class="stamp-dot ochre"></span> <strong>${flaggedCount}</strong> flagged (pre-2010 legacy NH numbering)</span>
+        </div>
+      `;
+
+      const badgeElem = document.getElementById('unplacedBadgeCount');
+      if (badgeElem) {
+        badgeElem.textContent = `${unplacedData.length} Records`;
+      }
+
+      const listElem = document.getElementById('unplacedList');
+      listElem.innerHTML = '';
+
+      unplacedData.forEach(item => {
+        const li = document.createElement('li');
+        li.className = 'unplaced-item';
+
+        const isLegacy = item.reason && item.reason.includes('pre-2010');
+        const tagClass = isLegacy ? 'ochre' : 'rust';
+
+        li.innerHTML = `
+          <div class="unplaced-row-head">
+            <span class="unplaced-nh">${item.nh_number || 'NO-NH'}</span>
+            <span class="unplaced-key">${item.project_key}</span>
+          </div>
+          <div class="unplaced-corridor">${item.corridor_name || 'Highway Section'}</div>
+          <div><span class="unplaced-reason-tag ${tagClass}">${item.reason}</span></div>
+        `;
+        listElem.appendChild(li);
+      });
+    }
+
+    async function loadData() {
+      let geojson = EMBEDDED_GEOJSON;
+      let unplaced = EMBEDDED_UNPLACED;
+
+      try {
+        const geoResp = await fetch('data/projects.geojson');
+        if (geoResp.ok) {
+          geojson = await geoResp.json();
+        }
+      } catch (e) {
+        console.log('Using embedded GeoJSON dataset');
+      }
+
+      try {
+        const unplacedResp = await fetch('data/unplaced_projects.json');
+        if (unplacedResp.ok) {
+          unplaced = await unplacedResp.json();
+        }
+      } catch (e) {
+        console.log('Using embedded Unplaced dataset');
+      }
+
+      renderMapFeatures(geojson);
+      renderUnplacedRegister(unplaced, geojson.features ? geojson.features.length : 0);
+    }
+
+    loadData();
+  </script>
+</body>
+</html>
