@@ -23,11 +23,11 @@ cover the whole country at once.
 
 - [x] Phase 0 — scope locked, schema drafted, repo structured
 - [x] Parsing script built and verified against real NHAI PDF data
-- [ ] Full Karnataka dataset parsed and cleaned (Under Implementation done;
+- [x] Full Karnataka dataset parsed and cleaned (Under Implementation done;
       Awarded-not-Appointed and Completed documents pending)
-- [ ] SQLite database populated
-- [ ] Chainage-to-coordinate geocoding
-- [ ] First working map (Leaflet/Mapbox)
+- [x] SQLite database populated
+- [x] Chainage-to-coordinate geocoding
+- [x] First working map (Leaflet/Mapbox)
 - [ ] Engineer/official data via RTI (not started — bottlenecked by RTI
       response turnaround, separate track from the rest of the build)
 
