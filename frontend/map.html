@@ -3048,7 +3048,7 @@
 
     function renderUnplacedRegister(unplacedData, placedCount) {
       const totalCount = placedCount + unplacedData.length;
-      const flaggedCount = unplacedData.filter(p => p.reason && p.reason.includes('pre-2010')).length;
+      const flaggedCount = unplacedData.filter(p => p.reason && p.reason.toLowerCase().includes('pre-2010')).length;
       const failedCount = unplacedData.length - flaggedCount;
 
       const summaryElem = document.getElementById('coverageSummary');
@@ -3058,7 +3058,7 @@
         </div>
         <div class="stat-breakdown">
           <span class="stat-pill"><span class="stamp-dot moss"></span> <strong>${placedCount}</strong> alignments charted on survey grid</span>
-          <span class="stat-pill"><span class="stamp-dot rust"></span> <strong>${failedCount}</strong> excluded (missing chainage / highway ID)</span>
+          <span class="stat-pill"><span class="stamp-dot rust"></span> <strong>${failedCount}</strong> excluded (missing chainage / unmapped)</span>
           <span class="stat-pill"><span class="stamp-dot ochre"></span> <strong>${flaggedCount}</strong> flagged (pre-2010 legacy NH numbering)</span>
         </div>
       `;
@@ -3075,7 +3075,7 @@
         const li = document.createElement('li');
         li.className = 'unplaced-item';
 
-        const isLegacy = item.reason && item.reason.includes('pre-2010');
+        const isLegacy = item.reason && item.reason.toLowerCase().includes('pre-2010');
         const tagClass = isLegacy ? 'ochre' : 'rust';
 
         li.innerHTML = `

@@ -432,13 +432,13 @@
 
       <!-- AUDIT COVERAGE STATS -->
       <div class="coverage-ledger-box">
-        <div class="coverage-stat-heading">
-          Current Audit Status: <span class="num-highlight">57 of 100</span> Projects Geocoded on Map
+        <div class="coverage-stat-heading" id="coverageHeading">
+          Current Audit Status: <span class="num-highlight">125 of 229</span> Projects Geocoded on Map
         </div>
-        <div class="coverage-breakdown-list">
-          <span class="coverage-pill"><span class="status-dot moss"></span> <strong>57</strong> projects mapped with verified chainage coordinates</span>
-          <span class="coverage-pill"><span class="status-dot rust"></span> <strong>39</strong> projects unplaced (missing chainage or highway identifier in source record)</span>
-          <span class="coverage-pill"><span class="status-dot ochre"></span> <strong>4</strong> projects flagged for manual review (pre-2010 legacy NH numbering)</span>
+        <div class="coverage-breakdown-list" id="coverageBreakdown">
+          <span class="coverage-pill"><span class="status-dot moss"></span> <strong id="statMapped">125</strong> projects mapped with verified chainage coordinates</span>
+          <span class="coverage-pill"><span class="status-dot rust"></span> <strong id="statUnplaced">95</strong> projects unplaced (missing chainage, TBD identifier, or greenfield alignment)</span>
+          <span class="coverage-pill"><span class="status-dot ochre"></span> <strong id="statFlagged">9</strong> projects flagged for manual review (pre-2010 legacy NH numbering)</span>
         </div>
       </div>
     </section>
@@ -461,7 +461,7 @@
           <div class="card-label">Master Table &bull; Full Register</div>
           <h2>Searchable Project Register</h2>
           <p>
-            Filter, search, and sort all 100 project records by highway number, town, corridor locality, contractor, joint-venture partner, or audit geocoding status.
+            Filter, search, and sort all registered project records across 4 MIS reports by highway number, town, corridor locality, contractor, concessionaire, DPR consultant, or audit geocoding status.
           </p>
         </div>
         <div class="card-action-link">Browse Full Data Table &rarr;</div>
@@ -509,5 +509,32 @@
     <span>Cartography: &copy; OpenStreetMap contributors &bull; License: GPL-3.0</span>
   </footer>
 
+  <script>
+    async function loadLiveStats() {
+      try {
+        const resp = await fetch('data/all_projects.json');
+        if (!resp.ok) return;
+        const projects = await resp.json();
+        const total = projects.length;
+        const mapped = projects.filter(p => p.geocode_status === 'Mapped').length;
+        const flagged = projects.filter(p => p.geocode_status && p.geocode_status.includes('Pre-2010')).length;
+        const unplaced = total - mapped - flagged;
+
+        const headingElem = document.getElementById('coverageHeading');
+        if (headingElem) {
+          headingElem.innerHTML = `Current Audit Status: <span class="num-highlight">${mapped} of ${total}</span> Projects Geocoded on Map`;
+        }
+        const statMapped = document.getElementById('statMapped');
+        const statUnplaced = document.getElementById('statUnplaced');
+        const statFlagged = document.getElementById('statFlagged');
+        if (statMapped) statMapped.textContent = mapped;
+        if (statUnplaced) statUnplaced.textContent = unplaced;
+        if (statFlagged) statFlagged.textContent = flagged;
+      } catch (e) {
+        console.log('Using static fallback coverage metrics');
+      }
+    }
+    loadLiveStats();
+  </script>
 </body>
 </html>
