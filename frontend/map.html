@@ -591,18 +591,73 @@
     }
 
     @media (max-width: 820px) {
+      html, body {
+        height: auto;
+        min-height: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+      }
+      .top-nav {
+        flex-direction: column;
+        gap: 10px;
+        align-items: center;
+        text-align: center;
+        padding: 10px 12px;
+      }
+      .nav-brand {
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+      }
+      .nav-links {
+        width: 100%;
+        justify-content: center;
+        gap: 6px;
+      }
+      .nav-links a {
+        font-size: 0.78rem;
+        padding: 8px 10px;
+        min-height: 44px;
+        flex: 1 1 calc(50% - 8px);
+        max-width: calc(50% - 4px);
+        text-align: center;
+      }
       .document-frame {
         flex-direction: column;
-        padding: 4px;
-        gap: 4px;
+        padding: 8px 6px;
+        gap: 10px;
+        height: auto;
+        flex: none;
+      }
+      .map-panel-container {
+        height: 55vh;
+        min-height: 380px;
+        width: 100%;
+        flex: none;
+      }
+      #map {
+        height: calc(100% - 24px);
+        min-height: 350px;
       }
       #sidebar {
         width: 100%;
         max-width: none;
-        height: 44%;
+        height: auto;
+        flex: none;
       }
-      .map-panel-container {
-        height: 56%;
+      .sidebar-content {
+        max-height: none;
+        overflow-y: visible;
+      }
+      .unplaced-list {
+        max-height: 420px;
+        overflow-y: auto;
+      }
+      .map-legend-stamp {
+        bottom: 8px;
+        left: 8px;
+        padding: 4px 8px;
+        font-size: 0.7rem;
       }
       .nav-subtitle {
         display: none;

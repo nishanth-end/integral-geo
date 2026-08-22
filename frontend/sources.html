@@ -440,20 +440,76 @@
     @media (max-width: 768px) {
       .top-nav {
         flex-direction: column;
-        gap: 8px;
-        align-items: flex-start;
+        gap: 10px;
+        align-items: center;
+        text-align: center;
+        padding: 10px 12px;
+      }
+      .nav-brand {
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+      }
+      .nav-links {
+        width: 100%;
+        justify-content: center;
+        gap: 6px;
+      }
+      .nav-links a {
+        font-size: 0.78rem;
+        padding: 8px 10px;
+        min-height: 44px;
+        flex: 1 1 calc(50% - 8px);
+        max-width: calc(50% - 4px);
+        text-align: center;
+      }
+      .main-container {
+        padding: 10px 8px;
+        gap: 12px;
+      }
+      .hero-sheet {
+        padding: 18px 14px;
+      }
+      .hero-sheet h1 {
+        font-size: 1.5rem;
+      }
+      .hero-lead {
+        font-size: 0.95rem;
+      }
+      .document-section-sheet {
+        padding: 16px 14px;
       }
       .sources-grid {
         grid-template-columns: 1fr;
+        gap: 12px;
       }
-      .hero-sheet {
-        padding: 20px;
+      .db-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
       }
-      .hero-sheet h1 {
-        font-size: 1.6rem;
+      .btn-download {
+        width: 100%;
+        min-height: 44px;
+        justify-content: center;
+      }
+      .schema-links-strip {
+        flex-direction: column;
+        gap: 8px;
       }
       .nav-subtitle {
         display: none;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero-sheet {
+        padding: 14px 10px;
+      }
+      .hero-sheet h1 {
+        font-size: 1.3rem;
+      }
+      .db-stats-grid {
+        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -490,7 +546,9 @@
 
     
     <section class="document-section-sheet" aria-label="Transparency Rationale">
-      This projects exists to provide transparent data available to the public in a stable open-source format. The original files are in PDF format and not easily accessible for analysis or verification. I made this to make the work easier for the public, journalists, and civic activists to verify the work of NHAI and the government. The database is also useful for researchers, journalists, and policy analysts to study infrastructure development patterns, contractor performance, and project timelines. To maintain public trust, the database is released under an open license (ODbL) and the application code is released under GPL-3.0.
+      <p style="font-size: 0.92rem; color: var(--ink-secondary); line-height: 1.6;">
+        This projects exists to provide transparent data available to the public in a stable open-source format. The original files are in PDF format and not easily accessible for analysis or verification. I made this to make the work easier for the public, journalists, and civic activists to verify the work of NHAI and the government. The database is also useful for researchers, journalists, and policy analysts to study infrastructure development patterns, contractor performance, and project timelines. To maintain public trust, the database is released under an open license (ODbL) and the application code is released under GPL-3.0.
+      </p>
     </section>
 
     <!-- SOURCE DOCUMENTS SECTION -->

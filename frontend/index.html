@@ -389,21 +389,70 @@
     @media (max-width: 768px) {
       .top-nav {
         flex-direction: column;
-        gap: 8px;
-        align-items: flex-start;
+        gap: 10px;
+        align-items: center;
+        text-align: center;
+        padding: 10px 12px;
+      }
+      .nav-brand {
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+      }
+      .nav-links {
+        width: 100%;
+        justify-content: center;
+        gap: 6px;
+      }
+      .nav-links a {
+        font-size: 0.78rem;
+        padding: 8px 10px;
+        min-height: 44px;
+        flex: 1 1 calc(50% - 8px);
+        max-width: calc(50% - 4px);
+        text-align: center;
       }
       .navigation-cards-grid,
       .methodology-grid {
         grid-template-columns: 1fr;
       }
       .hero-sheet {
-        padding: 20px;
+        padding: 20px 16px;
       }
       .hero-sheet h1 {
-        font-size: 1.6rem;
+        font-size: 1.55rem;
+      }
+      .coverage-breakdown-list {
+        flex-direction: column;
+        gap: 8px;
+      }
+      .coverage-pill {
+        font-size: 0.8rem;
+      }
+      .document-section-sheet {
+        padding: 18px 16px;
       }
       .nav-subtitle {
         display: none;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .main-container {
+        padding: 14px 10px;
+        gap: 14px;
+      }
+      .hero-sheet {
+        padding: 16px 12px;
+      }
+      .hero-sheet h1 {
+        font-size: 1.35rem;
+      }
+      .hero-lead {
+        font-size: 0.95rem;
+      }
+      .nav-card {
+        padding: 16px 14px;
       }
     }
   </style>
@@ -515,7 +564,9 @@
         <span style="font-family: var(--font-mono); font-size: 0.72rem; font-weight: normal; color: var(--ink-muted); text-transform: uppercase;">Form MIS-ATTRIB</span>
       </h2>
 
-      I'm Nishanth, an engineering undergraduate and an aspiring journalist. I Built this tool to serve as a public accountability layer to all NHAI road development projects. This is a small initiative I have taken to provide independent journalists all across India with fast and reliable access to public records. If you have any questions, suggestions, or feedback, please reach out to me through the contact form below.
+      <p style="font-size: 0.92rem; color: var(--ink-secondary); line-height: 1.6; margin-top: 8px;">
+        I'm Nishanth, an engineering undergraduate and an aspiring journalist. I Built this tool to serve as a public accountability layer to all NHAI road development projects. This is a small initiative I have taken to provide independent journalists all across India with fast and reliable access to public records. If you have any questions, suggestions, or feedback, please reach out to me through the contact form below.
+      </p>
 
       <!-- FACTUAL DETAILS LEDGER -->
       <div style="margin-top: 14px; border: 1px solid var(--border-rule); background: var(--bg-card); padding: 14px 18px;">

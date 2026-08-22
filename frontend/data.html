@@ -475,14 +475,129 @@
     @media (max-width: 768px) {
       .top-nav {
         flex-direction: column;
-        gap: 8px;
-        align-items: flex-start;
+        gap: 10px;
+        align-items: center;
+        text-align: center;
+        padding: 10px 12px;
+      }
+      .nav-brand {
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+      }
+      .nav-links {
+        width: 100%;
+        justify-content: center;
+        gap: 6px;
+      }
+      .nav-links a {
+        font-size: 0.78rem;
+        padding: 8px 10px;
+        min-height: 44px;
+        flex: 1 1 calc(50% - 8px);
+        max-width: calc(50% - 4px);
+        text-align: center;
+      }
+      .main-container {
+        padding: 10px 8px;
+        gap: 10px;
+      }
+      .document-page-header {
+        padding: 14px 12px;
+      }
+      .document-page-header h1 {
+        font-size: 1.35rem;
+      }
+      .header-desc {
+        font-size: 0.84rem;
       }
       .controls-ledger {
         flex-direction: column;
+        gap: 10px;
+        padding: 12px 10px;
       }
       .control-group {
         width: 100%;
+        min-width: 100%;
+      }
+      .cadastral-input,
+      .cadastral-select {
+        min-height: 44px;
+        font-size: 0.88rem;
+        padding: 8px 10px;
+      }
+      .btn-reset {
+        width: 100%;
+        min-height: 44px;
+      }
+
+      /* Responsive Card Layout for Projects Table */
+      .table-container {
+        border: none;
+        box-shadow: none;
+        background: transparent;
+      }
+      .cadastral-table {
+        display: block;
+        width: 100%;
+      }
+      .cadastral-table thead {
+        display: none;
+      }
+      .cadastral-table tbody {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        width: 100%;
+      }
+      .cadastral-table tbody tr {
+        display: flex;
+        flex-direction: column;
+        background: var(--bg-card);
+        border: 2px solid var(--border-rule);
+        box-shadow: inset 0 0 0 1px var(--bg-card), inset 0 0 0 2px var(--border-rule);
+        padding: 12px 14px;
+        gap: 6px;
+      }
+      .cadastral-table tbody tr:nth-child(even) {
+        background: var(--bg-card-alt);
+      }
+      .cadastral-table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        padding: 4px 0;
+        border-right: none;
+        border-bottom: 1px dashed var(--border-faint);
+        font-size: 0.82rem;
+      }
+      .cadastral-table td:last-child {
+        border-bottom: none;
+      }
+      .cadastral-table td::before {
+        content: attr(data-label);
+        font-family: var(--font-serif);
+        font-size: 0.70rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--ink-muted);
+        min-width: 90px;
+        margin-right: 8px;
+        flex-shrink: 0;
+        text-align: left;
+      }
+      .cadastral-table td.col-corridor,
+      .cadastral-table td.col-contractors {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 3px;
+      }
+      .cadastral-table td.col-corridor {
+        min-width: 0;
+      }
+      .cadastral-table td.col-contractors {
+        min-width: 0;
       }
       .nav-subtitle {
         display: none;
@@ -684,13 +799,13 @@
         const rolePrefix = (p.entity_role && p.entity_role !== 'Not listed') ? `<span class="role-tag">${p.entity_role}</span>` : '';
 
         tr.innerHTML = `
-          <td class="col-nh"><span class="col-nh-badge">${p.nh_number}</span></td>
-          <td class="col-chainage">${chStr}</td>
-          <td class="col-corridor">${p.corridor_name || 'Untitled Section'}</td>
-          <td class="col-source-doc"><span class="doc-badge">${p.source_document_label || 'MIS Report'}</span></td>
-          <td class="col-contractors">${rolePrefix}${p.contractors_display}</td>
-          <td class="col-status"><span class="status-badge ${badgeClass}">${p.geocode_status}</span></td>
-          <td class="col-key">${p.project_key}</td>
+          <td class="col-nh" data-label="NH Ref"><span class="col-nh-badge">${p.nh_number}</span></td>
+          <td class="col-chainage" data-label="Chainage">${chStr}</td>
+          <td class="col-corridor" data-label="Corridor">${p.corridor_name || 'Untitled Section'}</td>
+          <td class="col-source-doc" data-label="MIS Report"><span class="doc-badge">${p.source_document_label || 'MIS Report'}</span></td>
+          <td class="col-contractors" data-label="Entity / Role">${rolePrefix}${p.contractors_display}</td>
+          <td class="col-status" data-label="Audit Status"><span class="status-badge ${badgeClass}">${p.geocode_status}</span></td>
+          <td class="col-key" data-label="Audit Key">${p.project_key}</td>
         `;
         tableBody.appendChild(tr);
       });
