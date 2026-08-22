@@ -46,13 +46,18 @@
       padding: 0;
     }
 
-    html, body {
+        html, body {
       min-height: 100%;
       background-color: #dfd9c8;
+      background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%201000%201200%22%20width%3D%221000%22%20height%3D%221200%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3Cpattern%20id%3D%22soi-grid%22%20width%3D%22100%22%20height%3D%22100%22%20patternUnits%3D%22userSpaceOnUse%22%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M%20100%200%20L%200%200%200%20100%22%20fill%3D%22none%22%20stroke%3D%22%23564c40%22%20stroke-width%3D%220.5%22%20stroke-dasharray%3D%222%2C5%22%20opacity%3D%220.04%22/%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M%2048%2050%20L%2052%2050%20M%2050%2048%20L%2050%2052%22%20fill%3D%22none%22%20stroke%3D%22%23564c40%22%20stroke-width%3D%220.6%22%20opacity%3D%220.06%22/%3E%0A%20%20%20%20%3C/pattern%3E%0A%20%20%3C/defs%3E%0A%20%20%3Crect%20width%3D%221000%22%20height%3D%221200%22%20fill%3D%22url%28%23soi-grid%29%22/%3E%0A%20%20%3C!--%20Karnataka%20Survey%20Boundary%20--%3E%0A%20%20%3Cpath%20d%3D%22M%20580%2090%20L%20615%20120%20L%20605%20165%20L%20565%20240%20L%20585%20335%20L%20535%20415%20L%20575%20485%20L%20530%20555%20L%20585%20675%20L%20625%20765%20L%20580%20835%20L%20495%20950%20L%20435%20985%20L%20385%20945%20L%20330%20915%20L%20270%20855%20L%20250%20775%20L%20240%20675%20L%20230%20575%20L%20210%20475%20L%20245%20405%20L%20295%20335%20L%20345%20265%20L%20415%20205%20L%20495%20145%20Z%22%20fill%3D%22%23564c40%22%20fill-opacity%3D%220.012%22%20stroke%3D%22%23564c40%22%20stroke-width%3D%221.2%22%20stroke-dasharray%3D%226%2C4%22%20stroke-linejoin%3D%22round%22%20opacity%3D%220.07%22/%3E%0A%20%20%3C!--%20Graticule%20Reference%20Coordinates%20--%3E%0A%20%20%3Ctext%20x%3D%2224%22%20y%3D%22110%22%20font-family%3D%22%27IBM%20Plex%20Mono%27%2Cmonospace%22%20font-size%3D%228.5%22%20fill%3D%22%23564c40%22%20opacity%3D%220.06%22%3E18%C2%B000%27N%3C/text%3E%0A%20%20%3Ctext%20x%3D%2224%22%20y%3D%22410%22%20font-family%3D%22%27IBM%20Plex%20Mono%27%2Cmonospace%22%20font-size%3D%228.5%22%20fill%3D%22%23564c40%22%20opacity%3D%220.06%22%3E15%C2%B000%27N%3C/text%3E%0A%20%20%3Ctext%20x%3D%2224%22%20y%3D%22710%22%20font-family%3D%22%27IBM%20Plex%20Mono%27%2Cmonospace%22%20font-size%3D%228.5%22%20fill%3D%22%23564c40%22%20opacity%3D%220.06%22%3E13%C2%B000%27N%3C/text%3E%0A%20%20%3Ctext%20x%3D%2224%22%20y%3D%22950%22%20font-family%3D%22%27IBM%20Plex%20Mono%27%2Cmonospace%22%20font-size%3D%228.5%22%20fill%3D%22%23564c40%22%20opacity%3D%220.06%22%3E11%C2%B030%27N%3C/text%3E%0A%20%20%3Ctext%20x%3D%22230%22%20y%3D%221180%22%20font-family%3D%22%27IBM%20Plex%20Mono%27%2Cmonospace%22%20font-size%3D%228.5%22%20fill%3D%22%23564c40%22%20opacity%3D%220.06%22%3E74%C2%B000%27E%3C/text%3E%0A%20%20%3Ctext%20x%3D%22470%22%20y%3D%221180%22%20font-family%3D%22%27IBM%20Plex%20Mono%27%2Cmonospace%22%20font-size%3D%228.5%22%20fill%3D%22%23564c40%22%20opacity%3D%220.06%22%3E76%C2%B000%27E%3C/text%3E%0A%20%20%3Ctext%20x%3D%22600%22%20y%3D%221180%22%20font-family%3D%22%27IBM%20Plex%20Mono%27%2Cmonospace%22%20font-size%3D%228.5%22%20fill%3D%22%23564c40%22%20opacity%3D%220.06%22%3E78%C2%B000%27E%3C/text%3E%0A%3C/svg%3E");
+      background-position: center top;
+      background-repeat: repeat-y;
+      background-size: 1000px auto;
+      background-attachment: fixed;
       color: var(--ink-primary);
       font-family: var(--font-body);
-      font-size: 15px;
-      line-height: 1.6;
+      font-size: 14px;
+      line-height: 1.5;
       -webkit-font-smoothing: antialiased;
       display: flex;
       flex-direction: column;
@@ -416,6 +421,7 @@
         <li><a href="index.html" class="active">Home</a></li>
         <li><a href="map.html">Map View</a></li>
         <li><a href="data.html">Data Register</a></li>
+        <li><a href="sources.html">Sources & Data</a></li>
       </ul>
     </nav>
   </header>
@@ -427,7 +433,7 @@
       <div class="agency-kicker">Integral Geo &bull; Public Infrastructure Accountability, Karnataka Division</div>
       <h1>National Highway Projects Audit Register</h1>
       <p class="hero-lead">
-        An open-source civic accountability tool mapping and indexing all National Highways Authority of India (NHAI) road development, widening, and structure contracts across the State of Karnataka. Built to make public infrastructure spending, contractor allocations, and physical progress verifiable.
+        A publicly available, open-source tool to access and verify all NHAI road development projects in India. Currently in development stage, the MVP (this version) only contains August data of projects in Karnataka. This is a developmental choice to ensure the tool is stable and reliable before scaling it to nationwide database. This project mainly focuses on data transparency and provides information on public infrastructure spending, contractor allocations, and physical progress.
       </p>
 
       <!-- AUDIT COVERAGE STATS -->
@@ -499,6 +505,54 @@
             This project is released under the GNU General Public License v3.0 (GPL-3.0) as an independent civic tool to enable researchers, journalists, and citizens to verify public road contracts.
           </p>
         </div>
+      </div>
+    </section>
+
+    <!-- AUTHOR & PROJECT MAINTAINER SECTION -->
+    <section class="document-section-sheet" aria-label="Author and Project Maintainer">
+      <h2 style="display: flex; justify-content: space-between; align-items: baseline;">
+        <span>Project Maintainer</span>
+        <span style="font-family: var(--font-mono); font-size: 0.72rem; font-weight: normal; color: var(--ink-muted); text-transform: uppercase;">Form MIS-ATTRIB</span>
+      </h2>
+
+      I'm Nishanth, an engineering undergraduate and an aspiring journalist. I Built this tool to serve as a public accountability layer to all NHAI road development projects. This is a small initiative I have taken to provide independent journalists all across India with fast and reliable access to public records. If you have any questions, suggestions, or feedback, please reach out to me through the contact form below.
+
+      <!-- FACTUAL DETAILS LEDGER -->
+      <div style="margin-top: 14px; border: 1px solid var(--border-rule); background: var(--bg-card); padding: 14px 18px;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.84rem;">
+          <tr style="border-bottom: 1px dashed var(--border-faint);">
+            <td style="padding: 6px 0; width: 140px; font-family: var(--font-serif); font-weight: 700; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.05em; color: var(--ink-muted);">Name</td>
+            <td style="padding: 6px 0; font-family: var(--font-body); color: var(--ink-primary);">Nishanth</td>
+          </tr>
+          <tr style="border-bottom: 1px dashed var(--border-faint);">
+            <td style="padding: 6px 0; font-family: var(--font-serif); font-weight: 700; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.05em; color: var(--ink-muted);">Institution</td>
+            <td style="padding: 6px 0; font-family: var(--font-body); color: var(--ink-secondary);">Computer Science & Engineering, DSCE, Bengaluru </td>
+          </tr>
+          <tr style="border-bottom: 1px dashed var(--border-faint);">
+            <td style="padding: 6px 0; font-family: var(--font-serif); font-weight: 700; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.05em; color: var(--ink-muted);">Contact Me</td>
+            <td style="padding: 6px 0; font-family: var(--font-mono); font-size: 0.8rem; color: var(--ink-primary);"><a href="https://forms.gle/RUV8Ev5BEjdmBYFr7" style="color: inherit; text-decoration: underline;">Form</a></td>
+
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; font-family: var(--font-serif); font-weight: 700; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.05em; color: var(--ink-muted);">Profiles & Links</td>
+            <td style="padding: 6px 0;">
+              <div style="display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.8rem; align-items: center;">
+                <span style="display: inline-flex; align-items: center; gap: 5px; color: var(--ink-secondary);">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="opacity: 0.75;"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                  <strong>GitHub:</strong> https://github.com/nishanth-end
+                </span>
+                <span style="display: inline-flex; align-items: center; gap: 5px; color: var(--ink-secondary);">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="opacity: 0.75;"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                  <strong>LinkedIn:</strong> https://www.linkedin.com/in/nishend/
+                </span>
+                <span style="display: inline-flex; align-items: center; gap: 5px; color: var(--ink-secondary);">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.75;"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                  <strong>Substack:</strong> https://substack.com/@nishend
+                </span>
+              </div>
+            </td>
+          </tr>
+        </table>
       </div>
     </section>
   </main>

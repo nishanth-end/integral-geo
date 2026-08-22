@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sources & Data Transparency — NHAI Karnataka Highway Projects</title>
+
+  <!-- Google Fonts: Spectral (Official Serif), Newsreader (Legible Body), IBM Plex Mono (Data) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Spectral:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-parchment: #f4f1e8;
+      --bg-ledger: #ece7d8;
+      --bg-card: #faf8f2;
+      --bg-card-alt: #f1ebd9;
+      --ink-primary: #2b2620;
+      --ink-secondary: #564c40;
+      --ink-muted: #7d6e5d;
+      --border-rule: #6b5d4f;
+      --border-light: #c2b5a5;
+      --border-faint: #dbd2c4;
+      
+      --accent-moss: #3e562c;
+      --accent-moss-light: #edf2e8;
+      --accent-moss-border: #91a87e;
+      
+      --accent-rust: #9e4726;
+      --accent-rust-light: #f7ece6;
+      --accent-rust-border: #d49a80;
+      
+      --accent-ochre: #8a651e;
+      --accent-ochre-light: #f6f0df;
+      --accent-ochre-border: #cbb47e;
+
+      --accent-slate: #3b5066;
+      --accent-slate-light: #e9eef3;
+      --accent-slate-border: #98abbf;
+
+      --font-serif: 'Spectral', Georgia, 'Times New Roman', serif;
+      --font-body: 'Newsreader', Georgia, serif;
+      --font-mono: 'IBM Plex Mono', 'Courier Prime', Courier, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      min-height: 100%;
+      background-color: #dfd9c8;
+      color: var(--ink-primary);
+      font-family: var(--font-body);
+      font-size: 15px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Shared Top Navigation */
+    .top-nav {
+      background: var(--bg-ledger);
+      border-bottom: 2px solid var(--border-rule);
+      padding: 8px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 100;
+      flex-shrink: 0;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--ink-primary);
+    }
+
+    .nav-seal {
+      font-family: var(--font-serif);
+      font-size: 0.88rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-primary);
+    }
+
+    .nav-subtitle {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--ink-muted);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 4px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: var(--font-serif);
+      font-size: 0.84rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: var(--ink-secondary);
+      padding: 5px 12px;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+    }
+
+    .nav-links a:hover {
+      background: var(--bg-card);
+      border-color: var(--border-light);
+      color: var(--ink-primary);
+    }
+
+    .nav-links a.active {
+      background: var(--bg-parchment);
+      border: 1px solid var(--border-rule);
+      color: var(--ink-primary);
+      box-shadow: inset 0 -2px 0 var(--border-rule);
+    }
+
+    /* Main Container Layout */
+    .main-container {
+      flex: 1;
+      padding: 24px 16px;
+      max-width: 980px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Hero / Document Header */
+    .hero-sheet {
+      background: var(--bg-parchment);
+      border: 2px solid var(--border-rule);
+      box-shadow: inset 0 0 0 2px var(--bg-parchment), inset 0 0 0 3px var(--border-rule);
+      padding: 28px 32px;
+      position: relative;
+    }
+
+    .hero-sheet::before {
+      content: "";
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      width: 12px;
+      height: 12px;
+      border-top: 2px solid var(--border-rule);
+      border-left: 2px solid var(--border-rule);
+    }
+
+    .hero-sheet::after {
+      content: "";
+      position: absolute;
+      bottom: 6px;
+      right: 6px;
+      width: 12px;
+      height: 12px;
+      border-bottom: 2px solid var(--border-rule);
+      border-right: 2px solid var(--border-rule);
+    }
+
+    .agency-kicker {
+      font-family: var(--font-serif);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--ink-muted);
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .hero-sheet h1 {
+      font-family: var(--font-serif);
+      font-size: 2.1rem;
+      font-weight: 700;
+      color: var(--ink-primary);
+      line-height: 1.2;
+      margin-bottom: 12px;
+    }
+
+    .hero-lead {
+      font-size: 1.05rem;
+      color: var(--ink-secondary);
+      line-height: 1.55;
+    }
+
+    /* Section Sheets */
+    .document-section-sheet {
+      background: var(--bg-parchment);
+      border: 2px solid var(--border-rule);
+      box-shadow: inset 0 0 0 2px var(--bg-parchment), inset 0 0 0 3px var(--border-rule);
+      padding: 24px 28px;
+    }
+
+    .document-section-sheet h2 {
+      font-family: var(--font-serif);
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--ink-primary);
+      margin-bottom: 12px;
+      border-bottom: 2px double var(--border-rule);
+      padding-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .section-seal {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: normal;
+      color: var(--ink-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Download Cards Grid */
+    .sources-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 14px;
+    }
+
+    .source-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-rule);
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: background-color 0.15s ease;
+    }
+
+    .source-card:hover {
+      background: #fdfcf9;
+    }
+
+    .card-doc-type {
+      font-family: var(--font-serif);
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ink-muted);
+      margin-bottom: 4px;
+    }
+
+    .source-card h3 {
+      font-family: var(--font-serif);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--ink-primary);
+      line-height: 1.3;
+      margin-bottom: 8px;
+    }
+
+    .source-meta-table {
+      width: 100%;
+      font-size: 0.8rem;
+      border-collapse: collapse;
+      margin-bottom: 12px;
+    }
+
+    .source-meta-table td {
+      padding: 3px 0;
+      border-bottom: 1px dashed var(--border-faint);
+    }
+
+    .source-meta-table td:last-child {
+      text-align: right;
+      font-family: var(--font-mono);
+      color: var(--ink-primary);
+    }
+
+    .source-meta-table td.label-cell {
+      font-family: var(--font-serif);
+      color: var(--ink-secondary);
+    }
+
+    .btn-download {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: var(--bg-ledger);
+      border: 1px solid var(--border-rule);
+      color: var(--ink-primary);
+      padding: 7px 12px;
+      font-family: var(--font-serif);
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      text-decoration: none;
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+
+    .btn-download:hover {
+      background: var(--accent-moss);
+      color: #fff;
+      border-color: #233418;
+    }
+
+    .factual-note-strip {
+      margin-top: 14px;
+      padding: 10px 14px;
+      background: var(--bg-ledger);
+      border: 1px solid var(--border-light);
+      font-size: 0.82rem;
+      color: var(--ink-secondary);
+      line-height: 1.45;
+    }
+
+    /* Database Card Detailed View */
+    .db-ledger-box {
+      border: 1px solid var(--border-rule);
+      background: var(--bg-card);
+      padding: 18px 20px;
+      margin-top: 12px;
+    }
+
+    .db-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin: 14px 0;
+      padding: 12px 0;
+      border-top: 1px solid var(--border-light);
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .db-stat-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .db-stat-label {
+      font-family: var(--font-serif);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--ink-muted);
+    }
+
+    .db-stat-val {
+      font-family: var(--font-mono);
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--ink-primary);
+    }
+
+    .command-box {
+      background: #23201b;
+      color: #f1ebd9;
+      padding: 10px 14px;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      border: 1px solid var(--border-rule);
+      margin: 10px 0;
+      overflow-x: auto;
+    }
+
+    .schema-links-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 12px;
+      font-size: 0.84rem;
+    }
+
+    .schema-links-strip a {
+      color: var(--accent-moss);
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .schema-links-strip a:hover {
+      text-decoration: underline;
+    }
+
+    /* License Text Blocks */
+    .license-block {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      padding: 14px 18px;
+      margin-top: 10px;
+      font-size: 0.85rem;
+      color: var(--ink-secondary);
+      line-height: 1.55;
+    }
+
+    .license-block h3 {
+      font-family: var(--font-serif);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--ink-primary);
+      margin-bottom: 6px;
+    }
+
+    /* Footer */
+    .shared-footer {
+      background: var(--bg-ledger);
+      border-top: 1px solid var(--border-rule);
+      padding: 10px 16px;
+      font-size: 0.74rem;
+      color: var(--ink-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+    }
+
+    .shared-footer a {
+      color: var(--ink-secondary);
+      text-decoration: none;
+    }
+
+    .shared-footer a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+      .top-nav {
+        flex-direction: column;
+        gap: 8px;
+        align-items: flex-start;
+      }
+      .sources-grid {
+        grid-template-columns: 1fr;
+      }
+      .hero-sheet {
+        padding: 20px;
+      }
+      .hero-sheet h1 {
+        font-size: 1.6rem;
+      }
+      .nav-subtitle {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SHARED TOP NAVIGATION -->
+  <header class="top-nav">
+    <a href="index.html" class="nav-brand">
+      <span class="nav-seal">Integral Geo</span>
+      <span class="nav-subtitle">&bull; Public Infrastructure Tracker</span>
+    </a>
+    <nav>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="map.html">Map View</a></li>
+        <li><a href="data.html">Data Register</a></li>
+        <li><a href="sources.html" class="active">Sources & Data</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="main-container">
+
+    <!-- HERO / TITLE SHEET -->
+    <section class="hero-sheet" aria-label="Page Header">
+      <div class="agency-kicker">Integral Geo &bull; Public Infrastructure Accountability, Karnataka Division</div>
+      <h1>Sources & Data Transparency Register</h1>
+      <p class="hero-lead">
+        Public access repository providing the original government monitoring reports, the compiled relational SQLite database, and complete schema definitions for independent audit, replication, and citizen inspection.
+      </p>
+    </section>
+
+    Why?
+    <section class="document-section-sheet" aria-label="Transparency Rationale">
+      This projects exists to provide transparent data available to the public in a stable open-source format. The original files are in PDF format and not easily accessible for analysis or verification. I made this to make the work easier for the public, journalists, and civic activists to verify the work of NHAI and the government. The database is also useful for researchers, journalists, and policy analysts to study infrastructure development patterns, contractor performance, and project timelines. To maintain public trust, the database is released under an open license (ODbL) and the application code is released under GPL-3.0.
+    </section>
+
+    <!-- SOURCE DOCUMENTS SECTION -->
+    <section class="document-section-sheet" aria-label="Original Government MIS Reports">
+      <h2>
+        <span>Original NHAI Source Documents</span>
+        <span class="section-seal">Official MIS PDFs</span>
+      </h2>
+      <p style="font-size: 0.88rem; color: var(--ink-secondary);">
+        Direct copies of the monthly monitoring tables published by the National Highways Authority of India (NHAI) as on 01-August-2026.
+      </p>
+
+      <div class="sources-grid">
+        <!-- Card 1: Under Implementation -->
+        <div class="source-card">
+          <div>
+            <div class="card-doc-type">Active Construction Projects</div>
+            <h3>Under Implementation Report</h3>
+            <table class="source-meta-table">
+              <tr>
+                <td class="label-cell">Report Date</td>
+                <td>01-Aug-2026</td>
+              </tr>
+              <tr>
+                <td class="label-cell">Jurisdiction</td>
+                <td>Karnataka (Filtered)</td>
+              </tr>
+              <tr>
+                <td class="label-cell">Extracted Rows</td>
+                <td>100 projects</td>
+              </tr>
+              <tr>
+                <td class="label-cell">File Size</td>
+                <td>1.7 MB</td>
+              </tr>
+            </table>
+          </div>
+          <a href="data/sources/Under_implementation_MIS_august.pdf" download class="btn-download">
+            Download Source PDF &darr;
+          </a>
+        </div>
+
+        <!-- Card 2: Completed & PCC -->
+        <div class="source-card">
+          <div>
+            <div class="card-doc-type">O&M & Commercial Operations</div>
+            <h3>Completed & PCC / PCOD Issued</h3>
+            <table class="source-meta-table">
+              <tr>
+                <td class="label-cell">Report Date</td>
+                <td>01-Aug-2026</td>
+              </tr>
+              <tr>
+                <td class="label-cell">Jurisdiction</td>
+                <td>Nationwide (64 in KA)</td>
+              </tr>
+              <tr>
+                <td class="label-cell">Extracted Rows</td>
+                <td>64 projects</td>
+              </tr>
+              <tr>
+                <td class="label-cell">File Size</td>
+                <td>1.7 MB</td>
+              </tr>
+            </table>
+          </div>
+          <a href="data/sources/MIS_august_O_AND_M_PCC.pdf" download class="btn-download">
+            Download Source PDF &darr;
+          </a>
+        </div>
+
+        <!-- Card 3: Awarded Not Appointed -->
+        <div class="source-card">
+          <div>
+            <div class="card-doc-type">Awarded Pre-Construction</div>
+            <h3>Awarded But Not Started</h3>
+            <table class="source-meta-table">
+              <tr>
+                <td class="label-cell">Report Date</td>
+                <td>01-Aug-2026</td>
+              </tr>
+              <tr>
+                <td class="label-cell">Jurisdiction</td>
+                <td>Nationwide (10 in KA)</td>
+              </tr>
+              <tr>
+                <td class="label-cell">Extracted Rows</td>
+                <td>10 projects</td>
+              </tr>
+              <tr>
+                <td class="label-cell">File Size</td>
+                <td>278 KB</td>
+              </tr>
+            </table>
+          </div>
+          <a href="data/sources/MIS_Aug_Awarded_not_appointed.pdf" download class="btn-download">
+            Download Source PDF &darr;
+          </a>
+        </div>
+
+        <!-- Card 4: Balance For Award -->
+        <div class="source-card">
+          <div>
+            <div class="card-doc-type">DPR Preparation & Pipeline</div>
+            <h3>Balance For Award Report</h3>
+            <table class="source-meta-table">
+              <tr>
+                <td class="label-cell">Report Date</td>
+                <td>01-Aug-2026</td>
+              </tr>
+              <tr>
+                <td class="label-cell">Jurisdiction</td>
+                <td>Nationwide (55 in KA)</td>
+              </tr>
+              <tr>
+                <td class="label-cell">Extracted Rows</td>
+                <td>55 projects</td>
+              </tr>
+              <tr>
+                <td class="label-cell">File Size</td>
+                <td>861 KB</td>
+              </tr>
+            </table>
+          </div>
+          <a href="data/sources/Balance_for_award_MIS_august.pdf" download class="btn-download">
+            Download Source PDF &darr;
+          </a>
+        </div>
+      </div>
+
+      <div class="factual-note-strip">
+        Originally published by NHAI (<a href="https://nhai.gov.in" target="_blank" rel="noopener noreferrer" style="color: var(--ink-primary); font-weight: 600;">nhai.gov.in</a>). Data used here consists of facts extracted from these reports; see DATA_LICENSE for reuse terms.
+      </div>
+    </section>
+
+    <!-- DATABASE DOWNLOAD SECTION -->
+    <section class="document-section-sheet" aria-label="Compiled SQLite Database">
+      <h2>
+        <span>Compiled SQLite Database</span>
+        <span class="section-seal">Schema Version 3</span>
+      </h2>
+      <p style="font-size: 0.88rem; color: var(--ink-secondary);">
+        The relational database containing the complete snapshot-canonical model, junction tables, data-quality flags, and cached highway centerline geometries.
+      </p>
+
+      <div class="db-ledger-box">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px;">
+          <div>
+            <div style="font-family: var(--font-mono); font-size: 1.05rem; font-weight: 600; color: var(--ink-primary);">nhai_karnataka_v3.db</div>
+            <div style="font-size: 0.78rem; color: var(--ink-muted);">Format: SQLite 3 &bull; File Size: 2.8 MB &bull; Updated: August 2026</div>
+          </div>
+          <a href="data/sources/nhai_karnataka_v3.db" download class="btn-download">
+            Download Database (.db) &darr;
+          </a>
+        </div>
+
+        <div class="db-stats-grid">
+          <div class="db-stat-item">
+            <span class="db-stat-label">Canonical Projects</span>
+            <span class="db-stat-val">229</span>
+          </div>
+          <div class="db-stat-item">
+            <span class="db-stat-label">Project Snapshots</span>
+            <span class="db-stat-val">229</span>
+          </div>
+          <div class="db-stat-item">
+            <span class="db-stat-label">Mapped Alignments</span>
+            <span class="db-stat-val">125</span>
+          </div>
+          <div class="db-stat-item">
+            <span class="db-stat-label">Distinct Entities</span>
+            <span class="db-stat-val">159</span>
+          </div>
+          <div class="db-stat-item">
+            <span class="db-stat-label">Cached Highways</span>
+            <span class="db-stat-val">26</span>
+          </div>
+          <div class="db-stat-item">
+            <span class="db-stat-label">Audit Flags</span>
+            <span class="db-stat-val">61</span>
+          </div>
+        </div>
+
+        <div style="font-size: 0.84rem; color: var(--ink-secondary); margin-bottom: 6px;">
+          <strong>How to open this file:</strong> SQLite database — open with any SQLite browser (e.g. <a href="https://sqlitebrowser.org/" target="_blank" rel="noopener noreferrer" style="color: var(--ink-primary); font-weight: 600;">DB Browser for SQLite</a>, free) or via command line:
+        </div>
+        <div class="command-box">sqlite3 nhai_karnataka_v3.db</div>
+
+        <div class="schema-links-strip">
+          <a href="data/sources/schema.sql" download>View SQLite DDL (schema.sql) &rarr;</a>
+          <a href="data/sources/NHAI_Tracker_Schema_v3.docx" download>Download Schema Documentation (.docx) &rarr;</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- LICENSING & ATTRIBUTION SECTION -->
+    <section class="document-section-sheet" aria-label="Attribution and Licenses">
+      <h2>
+        <span>Data Attribution & Licensing</span>
+        <span class="section-seal">ODbL & GPL-3.0</span>
+      </h2>
+
+      <div class="license-block">
+        <h3>Source Data Attribution</h3>
+        <p>
+          The raw infrastructure project data used in this project is sourced from the publicly available Management Information System (MIS) documents published by the National Highways Authority of India (NHAI).
+        </p>
+        <ul style="margin: 8px 0 8px 20px; font-size: 0.82rem;">
+          <li><strong>Source Authority:</strong> National Highways Authority of India (NHAI), Regional Office - Bengaluru, Karnataka.</li>
+          <li><strong>Original Work:</strong> Publicly released monthly project status and monitoring reports.</li>
+          <li><strong>Disclaimer:</strong> This project is an independent, open-source civic computing initiative. It is not affiliated with, endorsed by, or connected to NHAI or the Government of India. The data is provided "as-is" for informational and transparency purposes.</li>
+        </ul>
+      </div>
+
+      <div class="license-block">
+        <h3>Database & Application Licensing</h3>
+        <p>
+          The transformed, geocoded, and structured database produced from these reports is made available under the <strong>Open Database License (ODbL) v1.0</strong>. Any individual factual contents of the database are licensed under the <strong>Database Contents License (DbCL) v1.0</strong>.
+        </p>
+        <p style="margin-top: 6px;">
+          The web application, geocoding pipeline, and user interface codebase are licensed under the <strong>GNU General Public License v3.0 (GPL-3.0)</strong>. Cartographic base map tiles &copy; OpenStreetMap contributors.
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- SHARED FOOTER -->
+  <footer class="shared-footer">
+    <span>Data Source: NHAI Public MIS Monthly Reports</span>
+    <span>Cartography: &copy; OpenStreetMap contributors &bull; License: GPL-3.0</span>
+  </footer>
+
+</body>
+</html>
